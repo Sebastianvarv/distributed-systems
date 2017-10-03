@@ -93,8 +93,8 @@ def publish(sock,srv,m):
 
 def noPublish(sock,srv,m):
     # Sending request
-    err, fack = __request(sock, srv, protocol.__REQ_REQUESTTIME, m)
-    return fack if err == protocol.__RSP_OK else None
+    err, resp = __request(sock, srv, protocol.__REQ_REQUESTTIME, m)
+    return resp if err == protocol.__RSP_OK else None
 
 
 def last(sock,srv,n):
@@ -165,8 +165,6 @@ if __name__ == '__main__':
     # Parse integer
     n = int(args.last)  # Last n messages to fetch
 
-    print(n)
-
     ids = []
     msgs = []
 
@@ -193,9 +191,9 @@ if __name__ == '__main__':
 
     if args.requesttime == True:
         curtime = time()
-        print(curtime)
-        rqtime = noPublish(s, server, curtime)
-        print(rqtime)
+        rqtime_resp = noPublish(s, server, [curtime])
+        rqtime = float(''.join(rqtime_resp))
+        print 'Time to publish message: %f seconds' % rqtime
 
     print 'Terminating ...'
     s.close()

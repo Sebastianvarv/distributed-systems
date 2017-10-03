@@ -156,10 +156,7 @@ def server_process(board, message, source):
         timestamp = time.time()
         return_time = board.publish(None, source)
         ts = return_time - timestamp
-        print timestamp
-        print return_time
-        print ts
-        return __MSG_FIELD_SEP.join((__RSP_OK,) + tuple(ts))
+        return __MSG_FIELD_SEP.join((__RSP_OK,) + tuple(str(ts)))
 
     else:
         LOG.debug('Unknown control message received: %s ' % message)
