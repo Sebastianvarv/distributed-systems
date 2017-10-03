@@ -54,6 +54,8 @@ if __name__ == '__main__':
                         help='Get iDs of last N messages,'\
                         'defaults to "all"',\
                         default=0)
+    parser.add_argument('-d', '--data', action='store_true',\
+                        help='Fetch all unread messages')
     args = parser.parse_args()
     # Declare client socket
     s = socket(AF_INET,SOCK_DGRAM)
@@ -81,7 +83,7 @@ if __name__ == '__main__':
             print 'Message published'
 
     # Query messages
-    if n >= 0:
+    if n >= 0 and not args.data:
         ids += last(s,server,n)
 
     if len(ids) > 0:
@@ -93,6 +95,9 @@ if __name__ == '__main__':
                             '%s' % (t_form(x[0]),x[1],x[2],x[3].decode('utf-8'))
         print 'Board published messages:'
         print '\n'.join(map(lambda x: m_form(x),msgs))
+
+    if args.data:
+        data = unread_msgs(server)
 
     print 'Terminating ...'
     s.close()

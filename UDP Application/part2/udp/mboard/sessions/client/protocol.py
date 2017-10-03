@@ -116,3 +116,7 @@ def get(sock,srv,m_id):
     err,m = __request(sock, srv, __REQ_GET, [m_id])
     m = m[:3] + [__MSG_FIELD_SEP.join(m[3:])]
     return m if err == __RSP_OK else None
+
+def unread_messages(sock, srv):
+    err, data = __request(sock, srv, __REQ_GET_DATA)
+    return data if err == __RSP_OK else None

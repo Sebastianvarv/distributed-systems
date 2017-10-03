@@ -189,8 +189,5 @@ def send_data(sock,srv,data):
         LOG.error('Error closing session %d' % sess_id)
     return n
 
-#def receivemessage():
-
-
-
-
+def receivemessage():
+    LOG.debug('')
