@@ -87,6 +87,7 @@ def server_process(board, message, source):
     '''
     shortmsgs = [__REQ_TIME, __REQ_REQUESTTIME]
     LOG.debug('Received message length %d' % len(message))
+    LOG.info('Message is %s' % message)
 
     if len(message) < 2 and message not in shortmsgs:
         LOG.debug('Not enough data received from %s ' % message)
