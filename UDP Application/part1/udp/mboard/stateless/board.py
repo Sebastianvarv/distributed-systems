@@ -47,12 +47,14 @@ def publish(msg,source):
         @param msg: string, received message (assuming UTF-8)
         @param source: tuple (ip,port), sender's socket address
     '''
-    global __m_board
-    ip,port = source
-    t = time()
-    uuid = __get_uuid()
-    __m_board[uuid] = (uuid, t, ip, port, msg)
-    return uuid
+    if msg:
+        global __m_board
+        ip,port = source
+        t = time()
+        uuid = __get_uuid()
+        __m_board[uuid] = (uuid, t, ip, port, msg)
+        return uuid
+    return time()
 
 def last(n=0):
     '''Return IDs of last n messages appended

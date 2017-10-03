@@ -19,7 +19,7 @@ Created on Aug 21, 2016
 # Needed imports ------------------ -------------------------------------------
 from udp.mboard.stateless import protocol
 from socket import socket, AF_INET, SOCK_DGRAM
-from time import localtime, asctime
+from time import localtime, asctime, time
 from argparse import ArgumentParser # Parsing command line arguments
 from sys import exit, stderr,stdin
 from os import linesep
@@ -90,6 +90,13 @@ def publish(sock,srv,m):
     err,_ = __request(sock, srv, protocol.__REQ_PUBLISH, [msg])
     return err == protocol.__RSP_OK
 
+
+def noPublish(sock,srv,m):
+    # Sending request
+    err, fack = __request(sock, srv, protocol.__REQ_REQUESTTIME, "")
+    return fack if err == protocol.__RSP_OK else None
+
+
 def last(sock,srv,n):
     '''Get iDs of last n messages
     @param sock: UDP socket, used to send/receive
@@ -117,6 +124,11 @@ def getTime(sock,srv):
     time = ''.join(time[:13]) + ':' + ''.join(time[15:17]) + ':' + ''.join(time[19:])
     return time if err == protocol.__RSP_OK else None
 
+def getRequestTime(sock,srv):
+    err, time = __request(sock, srv, protocol.__REQ_REQUESTTIME, '')
+
+    return
+
 # Main method -----------------------------------------------------------------
 if __name__ == '__main__':
     # Parsing arguments
@@ -138,6 +150,7 @@ if __name__ == '__main__':
                         'defaults to "all"',\
                         default=0)
     parser.add_argument('-t','--time', action='store_true')
+    parser.add_argument('-rt', '--requesttime', action='store_true')
     args = parser.parse_args()
     # Declare client socket
     s = socket(AF_INET,SOCK_DGRAM)
@@ -175,5 +188,11 @@ if __name__ == '__main__':
 
     if args.time == True:
         print(getTime(s, server))
+
+    if args.requesttime == True:
+        curtime = time()
+        print(curtime)
+        publish(s, server, curtime)
+
     print 'Terminating ...'
     s.close()
