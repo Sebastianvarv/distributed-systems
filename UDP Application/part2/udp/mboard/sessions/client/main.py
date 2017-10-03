@@ -78,7 +78,10 @@ if __name__ == '__main__':
     ids = []
     msgs = []
 
+    print 'len of message %d' % len(m)
+    print m
     if len(m) > 0:
+        print 'About to publish'
         if publish(s, server, m):
             print 'Message published'
 

@@ -37,7 +37,7 @@ LOG = logging.getLogger()
 # Imports----------------------------------------------------------------------
 from udp.mboard.sessions.common import __REQ_PUBLISH, __MSG_FIELD_SEP, \
     __RSP_OK, __REQ_LAST, __REQ_GET, __RSP_ERRTRANSM, __REQ_GET_DATA
-from udp.mboard.sessions.client.sessions import send_data
+from udp.mboard.sessions.client.sessions import send_data, receive_data
 
 # Constants -------------------------------------------------------------------
 ___NAME = 'MBoard Protocol'
@@ -59,6 +59,7 @@ def __request(sock, srv, r_type, args):
     m = __MSG_FIELD_SEP.join([r_type] + map(str, args))
     # Send/Receive using sessions
     n = send_data(sock, srv, m)
+    print 'n from send_data is %d' % n
     # @TODO: Receive using sessions
     #     source = None
     #     while source != srv:
@@ -83,8 +84,13 @@ def __request(sock, srv, r_type, args):
     #             __err(protocol.__ERR_MSGS[err])
     #         else:
     #             __err('Malformed server response [%s]' % err)
-    err = __RSP_OK if n > 0 else __RSP_ERRTRANSM
-    return err, [n]
+
+    print 'Trying to receive data'
+    err, r = receive_data(sock, srv)
+    print 'Received the data'
+
+    # err = __RSP_OK if n > 0 else __RSP_ERRTRANSM
+    return err, r
 
 
 def publish(sock, srv, m):
@@ -95,9 +101,12 @@ def publish(sock, srv, m):
     @returns True if successfully published, else False
     '''
     # Try converting to utf-8
+    print 'from publish'
     msg = m.encode('utf-8')
+    print msg
     # Sending request
     err, _ = __request(sock, srv, __REQ_PUBLISH, [msg])
+    print err
     return err == __RSP_OK
 
 
