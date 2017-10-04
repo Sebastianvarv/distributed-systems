@@ -56,10 +56,10 @@ def __request(sock, srv, r_type, args, download=False):
     @param args: list, request parameters/data
     '''
 
-    LOG.debug("###### MAKING NEW REQUEST ######")
     # Envelope request (prepare data unit)
     m = __MSG_FIELD_SEP.join([r_type] + map(str, args))
     # Send/Receive using sessions
+    print 'Sending data'
     n = send_data(sock, srv, m)
     # @TODO: Receive using sessions
     #     source = None
@@ -86,20 +86,15 @@ def __request(sock, srv, r_type, args, download=False):
     #         else:
     #             __err('Malformed server response [%s]' % err)
 
-    LOG.debug("Client protocol request, trying to receive data from %s" % str(srv))
     err, r = receive_data(sock, srv)
-    LOG.debug('Client protocol received data %s' % str(r))
 
     if download:
-        LOG.debug("Download branch in client protocol, r %s" % str(r))
         r = download_blocks(sock, srv, r[0], r[1])
     # err = __RSP_OK if n > 0 else __RSP_ERRTRANSM
     return err, r
 
 def get_data_from(sock, srv):
-    LOG.debug("Get data initiated by client.protocol")
     err, n = __request(sock, srv, __REQ_HAS_MESSAGES, ["I am a teapot"])
-    LOG.debug("Number of messages in server: %s" % str(n))
     if n == 0:
         return "No new messages in server"
 
@@ -114,12 +109,10 @@ def publish(sock, srv, m):
     @returns True if successfully published, else False
     '''
 
-    LOG.debug("Client published message %s" % m)
     # Try converting to utf-8
     msg = m.encode('utf-8')
     # Sending request
     err, _ = __request(sock, srv, __REQ_PUBLISH, [msg])
-    LOG.debug("Response from publish %s" % str(err))
     return err == __RSP_OK
 
 
@@ -145,8 +138,3 @@ def get(sock, srv, m_id):
     err, m = __request(sock, srv, __REQ_GET, [m_id])
     m = m[:3] + [__MSG_FIELD_SEP.join(m[3:])]
     return m if err == __RSP_OK else None
-
-#
-# def unread_messages(sock, srv):
-#     err, data = __request(sock, srv, __REQ_GET_DATA)
-#     return data if err == __RSP_OK else None

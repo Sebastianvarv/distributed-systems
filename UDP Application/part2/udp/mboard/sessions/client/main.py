@@ -78,9 +78,6 @@ if __name__ == '__main__':
         #
         m = stdin.read()
 
-    LOG.debug("Client main, message to publish: %s" % m)
-    LOG.debug("Client main, message length: %d" % len(m))
-
     # Parse integer
     n = int(args.last)  # Last n messages to fetch
 
@@ -108,10 +105,7 @@ if __name__ == '__main__':
 
     if args.data:
         msg_data = get_data_from(sock, srv)
-        LOG.debug("Message data %s" % str(msg_data))
+        print 'Message list %s' % str(msg_data  )
 
     print 'Terminating ...'
     sock.close()
-
-    # fetchall lisada
-    # getid fixida

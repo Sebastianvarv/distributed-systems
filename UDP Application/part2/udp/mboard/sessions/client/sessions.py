@@ -124,6 +124,7 @@ def __closesession(sock, srv, sess_id):
     @returns int, number of full messages delivered
     '''
     err, args = __request(sock, srv, __SESS_REQ_CLOSE, [sess_id])
+    print args
     if err != __SESS_RSP_OK or len(args) < 1:
         LOG.error('No arguments in server\'s response, integer ' \
                   'expected')
@@ -181,11 +182,8 @@ def send_data(sock, srv, data):
     if sess_id == None:
         LOG.error('Can not open new session for sending')
         return 0
-    LOG.debug('Session [%d] opened for sending' % sess_id)
     m_size = len(data)
     b_count, b_size = __calculate_blocksize(sess_id, m_size)
-    LOG.debug('Will send %d blocks, maximal size [%d] bytes' \
-              '' % (b_count, b_size))
 
     for i in range(b_count):
         l = (m_size - b_size * i) if i == b_count - 1 else b_size
@@ -205,14 +203,11 @@ def send_data(sock, srv, data):
 
 
 def receive_data(sock, srv):
-    LOG.debug("Client sessions receive_data socket: %s" % str(sock))
-    LOG.debug("Client sessions receive_data server: %s" % str(srv))
     source = None
     while source != srv:
         try:
             # Try receive a response
             r, source = sock.recvfrom(__SESS_MAX_PDU)
-            LOG.debug("Client sessions received block: %s" % str(r))
         except KeyboardInterrupt:
             __err('Ctrl+C issued, terminating ...')
             sock.close()
@@ -224,9 +219,7 @@ def receive_data(sock, srv):
 
     # Check error code
     r_data = r.split(__MSG_FIELD_SEP)
-    LOG.debug('r_data is %s' % r_data)
     err, r_args = r_data[0], r_data[1:] if len(r_data) > 1 else []
-    LOG.debug('Contents of err are %s' % err)
     if err != __SESS_RSP_OK:
         if err in __SESS_ERR_MSG.keys():
             __err('Error: server response code [%s]' % err)

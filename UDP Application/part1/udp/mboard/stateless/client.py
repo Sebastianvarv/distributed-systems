@@ -94,7 +94,7 @@ def publish(sock,srv,m):
 def noPublish(sock,srv,m):
     # Sending request
     err, resp = __request(sock, srv, protocol.__REQ_REQUESTTIME, m)
-    return resp if err == protocol.__RSP_OK else None
+    return resp  if err == protocol.__RSP_OK else None
 
 
 def last(sock,srv,n):

@@ -201,7 +201,7 @@ def process_session(block, source):
     if block.startswith(__SESS_REQ_CLOSE + __SESS_FIELD_SEP):
         parts = block.split(__SESS_FIELD_SEP)
         if len(parts) < 2:
-            LOG.degug('Malformed received from %s ' % source)
+            LOG.debug('Malformed received from %s ' % source)
             return __SESS_RSP_BADFORMAT
         try:
             sess_id = int(parts[1])
