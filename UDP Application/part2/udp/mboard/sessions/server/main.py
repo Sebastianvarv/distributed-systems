@@ -87,6 +87,8 @@ if __name__ == '__main__':
         try:
             LOG.debug('Awaiting requests ...')
             m,source = __server_socket.recvfrom(sessions.__SESS_MAX_PDU)
+            LOG.debug("Received data from client %s" % str(source))
+            LOG.debug("Message received: %s" % m)
             # Maybe some client is still using protocol 0.0.0.x
             old_protocol = m[0] in protocol.__CTR_MSGS.keys()
             if old_protocol:
@@ -97,8 +99,7 @@ if __name__ == '__main__':
             else:
                 # Better to use protocol 0.0.1.x supporting sessions
                 r = sessions.process_session(m,source)
-
-            __server_socket.sendto(r,source)
+            __server_socket.sendto(r, source)
 
             # On protocol 0.    0.1.x the messages are delivered using sessions
             # processor and therefore server needs to check if there are any
@@ -107,6 +108,8 @@ if __name__ == '__main__':
                 m,source = sessions.getincoming()
                 LOG.debug('Received message from %s:%d' % source)
                 r = protocol.server_process(board, m, source)
+        #       r is [control code]:[list of message id-s]
+        #       goal is to return this to client side (using session)
 
         except KeyboardInterrupt as e:
             LOG.debug('Crtrl+C issued ...')

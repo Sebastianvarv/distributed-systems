@@ -191,3 +191,39 @@ def getincoming():
     global __M
     source,m = __M.pop(0)
     return m,source
+
+def send_data(sock, client, data):
+    '''Send data from server to cliient.
+    @param: sock: UDP socket
+    @param: client: tuple ( ip, port ), client socket address to refer to
+    @param: data: bytes, data to send to server
+    @returns: int, number of delivered messages
+    '''
+
+    LOG.debug('Sending data from server, size [%d] bytes to %s:%d' % ((len(data),) + client))
+    # Get session iD
+    sess_id = __opensession(sock, srv)
+    if sess_id == None:
+        LOG.error('Can not open new session for sending')
+        return 0
+    LOG.debug('Session [%d] opened for sending' % sess_id)
+    m_size = len(data)
+    b_count, b_size = __calculate_blocksize(sess_id, m_size)
+    LOG.debug('Will send %d blocks, maximal size [%d] bytes' \
+              '' % (b_count, b_size))
+
+    for i in range(b_count):
+        l = (m_size - b_size * i) if i == b_count - 1 else b_size
+        h = (sess_id, i, b_count, l)
+        b = data[i * b_size:i * b_size + l]
+        LOG.debug('Sending block header %s, block size %d bytes ' \
+                  '' % (str(h), len(b)))
+        c_sent = -1
+        while c_sent <= 0:
+            c_sent = __sendblock(sock, srv, h, b)
+
+    # Close session, ensure message was received
+    n = __closesession(sock, srv, sess_id)
+    if n <= 0:
+        LOG.error('Error closing session %d' % sess_id)
+    return n

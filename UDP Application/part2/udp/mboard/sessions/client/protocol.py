@@ -59,7 +59,6 @@ def __request(sock, srv, r_type, args):
     m = __MSG_FIELD_SEP.join([r_type] + map(str, args))
     # Send/Receive using sessions
     n = send_data(sock, srv, m)
-    print 'n from send_data is %d' % n
     # @TODO: Receive using sessions
     #     source = None
     #     while source != srv:
@@ -85,9 +84,8 @@ def __request(sock, srv, r_type, args):
     #         else:
     #             __err('Malformed server response [%s]' % err)
 
-    print 'Trying to receive data'
+    LOG.debug("Client protocol request, trying to receive data from %s" % str(srv))
     err, r = receive_data(sock, srv)
-    print 'Received the data'
 
     # err = __RSP_OK if n > 0 else __RSP_ERRTRANSM
     return err, r
@@ -100,13 +98,13 @@ def publish(sock, srv, m):
     @param m: string, message to publish, maximal length 2^16-32-2 bytes
     @returns True if successfully published, else False
     '''
+
+    LOG.debug("Client published message %s" % m)
     # Try converting to utf-8
-    print 'from publish'
     msg = m.encode('utf-8')
-    print msg
     # Sending request
     err, _ = __request(sock, srv, __REQ_PUBLISH, [msg])
-    print err
+    LOG.debug("Response from publish %s" % str(err))
     return err == __RSP_OK
 
 

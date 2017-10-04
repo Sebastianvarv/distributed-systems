@@ -16,6 +16,12 @@ Created on Aug 23, 2016
 
 @author: devel
 '''
+# Setup Python logging --------------------------------------------------------
+import logging
+
+FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+LOG = logging.getLogger()
 # Needed imports ------------------ -------------------------------------------
 from udp.mboard.sessions.client.protocol import publish, last, get
 from socket import socket, AF_INET, SOCK_DGRAM
@@ -72,16 +78,17 @@ if __name__ == '__main__':
         #
         m = stdin.read()
 
+    LOG.debug("Client main, message to publish: %s" % m)
+    LOG.debug("Client main, message length: %d" % len(m))
+
     # Parse integer
     n = int(args.last)  # Last n messages to fetch
 
     ids = []
     msgs = []
 
-    print 'len of message %d' % len(m)
-    print m
+
     if len(m) > 0:
-        print 'About to publish'
         if publish(s, server, m):
             print 'Message published'
 
@@ -104,3 +111,6 @@ if __name__ == '__main__':
 
     print 'Terminating ...'
     s.close()
+
+    # fetchall lisada
+    # getid fixida

@@ -205,17 +205,14 @@ def send_data(sock, srv, data):
 
 
 def receive_data(sock, srv):
+    LOG.debug("Client sessions receive_data socket: %s" % str(sock))
+    LOG.debug("Client sessions receive_data server: %s" % str(srv))
     source = None
-    print 'in receive_data'
-    print sock
-    print srv
     while source != srv:
         try:
             # Try receive a response
             r, source = sock.recvfrom(__SESS_MAX_PDU)
-            print 'from rcvdata'
-            print r
-            print source
+            LOG.debug("Client sessions received block: %s" % str(r))
         except KeyboardInterrupt:
             __err('Ctrl+C issued, terminating ...')
             sock.close()
