@@ -124,7 +124,6 @@ def __closesession(sock, srv, sess_id):
     @returns int, number of full messages delivered
     '''
     err, args = __request(sock, srv, __SESS_REQ_CLOSE, [sess_id])
-    print args
     if err != __SESS_RSP_OK or len(args) < 1:
         LOG.error('No arguments in server\'s response, integer ' \
                   'expected')
