@@ -23,7 +23,7 @@ FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
 # Needed imports ------------------ -------------------------------------------
-from udp.mboard.sessions.client.protocol import publish, last, get
+from udp.mboard.sessions.client.protocol import publish, last, get, get_data_from
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import localtime, asctime
 from argparse import ArgumentParser # Parsing command line arguments
@@ -64,8 +64,8 @@ if __name__ == '__main__':
                         help='Fetch all unread messages')
     args = parser.parse_args()
     # Declare client socket
-    s = socket(AF_INET,SOCK_DGRAM)
-    server = (args.host,int(args.port))  # Server's socket address
+    sock = socket(AF_INET, SOCK_DGRAM)
+    srv = (args.host, int(args.port))  # Server's socket address
 
     m = args.message # Message to publish
     if m == '-':
@@ -89,15 +89,15 @@ if __name__ == '__main__':
 
 
     if len(m) > 0:
-        if publish(s, server, m):
+        if publish(sock, srv, m):
             print 'Message published'
 
     # Query messages
     if n >= 0 and not args.data:
-        ids += last(s,server,n)
+        ids += last(sock, srv, n)
 
     if len(ids) > 0:
-        msgs += map(lambda x: get(s,server,x), ids)
+        msgs += map(lambda x: get(sock, srv, x), ids)
         msgs = filter(lambda x: x != None, msgs)
     if len(msgs) > 0:
         t_form = lambda x: asctime(localtime(float(x)))
@@ -107,10 +107,11 @@ if __name__ == '__main__':
         print '\n'.join(map(lambda x: m_form(x),msgs))
 
     if args.data:
-        data = unread_msgs(server)
+        msg_data = get_data_from(sock, srv)
+        LOG.debug("Message data %s" % str(msg_data))
 
     print 'Terminating ...'
-    s.close()
+    sock.close()
 
     # fetchall lisada
     # getid fixida

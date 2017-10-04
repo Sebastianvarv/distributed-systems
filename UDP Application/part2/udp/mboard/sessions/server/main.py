@@ -36,13 +36,17 @@ Created on Aug 19, 2016
 '''
 # Setup Python logging ------------------ -------------------------------------
 import logging
+
 FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
-logging.basicConfig(level=logging.DEBUG,format=FORMAT)
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
-from udp.mboard.sessions.server import protocol,sessions
+from udp.mboard.sessions.common import __REQ_GET_MESSAGES, __MSG_FIELD_SEP
+from udp.mboard.sessions.server import protocol, sessions
 from udp.mboard.sessions import board
 from socket import socket, AF_INET, SOCK_DGRAM
-from argparse import ArgumentParser # Parsing command line arguments
+from argparse import ArgumentParser  # Parsing command line arguments
+from time import sleep
+
 # Constants -------------------------------------------------------------------
 ___NAME = 'MBoard Server'
 ___VER = '0.0.1.2'
@@ -52,33 +56,37 @@ ___VENDOR = 'Copyright (c) 2016 DSLab'
 # -----------------------------------------------------------------------------
 __DEFAULT_SERVER_PORT = 7777
 __DEFAULT_SERVER_INET_ADDR = '127.0.0.1'
+
+
 # Private methods -------------------------------------------------------------
 def __info():
     return '%s version %s (%s) %s' % (___NAME, ___VER, ___BUILT, ___VENDOR)
+
+
 # Main method -----------------------------------------------------------------
 if __name__ == '__main__':
     # Parsing arguments
     parser = ArgumentParser(description=__info(),
-                            version = ___VER)
-    parser.add_argument('-l','--listenaddr', \
-                        help='Bind server socket to INET address, '\
-                        'defaults to %s' % __DEFAULT_SERVER_INET_ADDR, \
+                            version=___VER)
+    parser.add_argument('-l', '--listenaddr', \
+                        help='Bind server socket to INET address, ' \
+                             'defaults to %s' % __DEFAULT_SERVER_INET_ADDR, \
                         default=__DEFAULT_SERVER_INET_ADDR)
-    parser.add_argument('-p','--listenport', \
-                        help='Bind server socket to UDP port, '\
-                        'defaults to %d' % __DEFAULT_SERVER_PORT, \
+    parser.add_argument('-p', '--listenport', \
+                        help='Bind server socket to UDP port, ' \
+                             'defaults to %d' % __DEFAULT_SERVER_PORT, \
                         default=__DEFAULT_SERVER_PORT)
     args = parser.parse_args()
     # Starting server
     LOG.info('%s version %s started ...' % (___NAME, ___VER))
-    LOG.info('Using %s version %s' % ( protocol.___NAME, protocol.___VER))
-    LOG.info('Using %s version %s' % ( board.___NAME, board.___VER))
-    LOG.info('Using %s version %s' % ( sessions.___NAME, sessions.___VER))
+    LOG.info('Using %s version %s' % (protocol.___NAME, protocol.___VER))
+    LOG.info('Using %s version %s' % (board.___NAME, board.___VER))
+    LOG.info('Using %s version %s' % (sessions.___NAME, sessions.___VER))
     # Declare UDP Socket
-    __server_socket = socket(AF_INET,SOCK_DGRAM)
+    __server_socket = socket(AF_INET, SOCK_DGRAM)
     LOG.debug('Server socket created, descriptor %d' % __server_socket.fileno())
     # Bind UDP Socket
-    __server_socket.bind((args.listenaddr,args.listenport))
+    __server_socket.bind((args.listenaddr, args.listenport))
     LOG.debug('Server socket bound on %s:%d' % __server_socket.getsockname())
     LOG.info('Accepting requests on UDP %s:%d' % __server_socket.getsockname())
 
@@ -86,33 +94,40 @@ if __name__ == '__main__':
     while 1:
         try:
             LOG.debug('Awaiting requests ...')
-            m,source = __server_socket.recvfrom(sessions.__SESS_MAX_PDU)
+            m, source = __server_socket.recvfrom(sessions.__SESS_MAX_PDU)
             LOG.debug("Received data from client %s" % str(source))
             LOG.debug("Message received: %s" % m)
             # Maybe some client is still using protocol 0.0.0.x
             old_protocol = m[0] in protocol.__CTR_MSGS.keys()
             if old_protocol:
                 LOG.debug('Received message from %s:%d' % source)
-                LOG.info('%s:%d is using old protocol! not using sessions,'\
+                LOG.info('%s:%d is using old protocol! not using sessions,' \
                          'big messages will be cut' % source)
+                # returns string to return to client
                 r = protocol.server_process(board, m, source, old_protocol)
+            # Send to client
             else:
                 # Better to use protocol 0.0.1.x supporting sessions
-                r = sessions.process_session(m,source)
+                r = sessions.process_session(m, source)
             __server_socket.sendto(r, source)
 
             # On protocol 0.    0.1.x the messages are delivered using sessions
             # processor and therefore server needs to check if there are any
             # New messages are the delegated to message processor
             if not old_protocol and sessions.checkincoming() > 0:
-                m,source = sessions.getincoming()
+                m, source = sessions.getincoming()
                 LOG.debug('Received message from %s:%d' % source)
                 r = protocol.server_process(board, m, source)
-        #       r is [control code]:[list of message id-s]
-        #       goal is to return this to client side (using session)
+
+                if m.startswith(__REQ_GET_MESSAGES + __MSG_FIELD_SEP):
+                    blocked_data = sessions.send_session_and_block_len(source, r)
+                    __server_socket.sendto(blocked_data, source)
+                    sleep(2)
+                else:
+                    __server_socket.sendto(r, source)
 
         except KeyboardInterrupt as e:
-            LOG.debug('Crtrl+C issued ...')
+            LOG.debug('Ctrl+C issued ...')
             LOG.info('Terminating server ...')
             break
 

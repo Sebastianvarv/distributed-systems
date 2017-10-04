@@ -76,3 +76,11 @@ def get(m_id):
     '''
     global __m_board
     return __m_board[m_id][1:]
+
+def get_size():
+    global __m_board
+    return len(__m_board)
+
+def get_all_unread():
+    global __m_board
+    return __m_board

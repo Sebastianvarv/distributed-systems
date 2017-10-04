@@ -13,7 +13,7 @@ LOG = logging.getLogger()
 from sys import exit, stderr
 from udp.mboard.sessions.common import __SESS_REQ_NEW, __SESS_FIELD_SEP, \
     __SESS_RSP_OK, __SESS_MAX_PDU, __SESS_ERR_MSG, __SESS_REQ_SEND_BLOCK, \
-    __SESS_RSP_RETRANS, __SESS_REQ_CLOSE
+    __SESS_RSP_RETRANS, __SESS_REQ_CLOSE, __MSG_FIELD_SEP, __REQ_GET_BLOCK, __REQ_DOWNLOAD_FINISHED
 
 # Constants -------------------------------------------------------------------
 ___NAME = 'Sessions Protocol'
@@ -223,12 +223,33 @@ def receive_data(sock, srv):
             print 'Expected %s:%d' % srv
 
     # Check error code
-    r_data = r.split(__SESS_FIELD_SEP)
+    r_data = r.split(__MSG_FIELD_SEP)
+    LOG.debug('r_data is %s' % r_data)
     err, r_args = r_data[0], r_data[1:] if len(r_data) > 1 else []
+    LOG.debug('Contents of err are %s' % err)
     if err != __SESS_RSP_OK:
-        if err in __SESS_ERR_MSG.keys(err):
+        if err in __SESS_ERR_MSG.keys():
             __err('Error: server response code [%s]' % err)
             __err(__SESS_ERR_MSG[err])
         else:
             __err('Malformed server response [%s]' % err)
     return err, r_args
+
+def send_close_session(sock, srv, s_id):
+    err, resp = __request(sock, srv, __REQ_DOWNLOAD_FINISHED, [s_id])
+    if err == __SESS_RSP_OK:
+        return 1
+    else:
+        return None
+
+def download_blocks(sock, srv, s_id, block_n):
+    data = ""
+
+    for i in range(int(block_n)):
+        err, resp = __request(sock, srv, __REQ_GET_BLOCK, [int(s_id), i])
+        resp_string = ''.join(resp)
+        data += resp_string
+
+    data = data.split(__SESS_RSP_OK + __MSG_FIELD_SEP)[1].split(":")
+    send_close_session(sock, srv, s_id)
+    return data

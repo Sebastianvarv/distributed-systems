@@ -33,11 +33,17 @@ MAX_PDU_SIZE = 200*1024*1024 # Reasonable amount of data to store in RAM
 __REQ_PUBLISH = '1'
 __REQ_LAST = '2'
 __REQ_GET = '3'
-__REQ_GET_DATA = '4'
-__CTR_MSGS = { __REQ_GET:'Get message by id',
-               __REQ_LAST:'Get iDs of last N messages',
-               __REQ_PUBLISH:'Publish new message',
-               __REQ_GET_DATA:'Get all unread messages'
+__REQ_HAS_MESSAGES = '4'
+__REQ_GET_MESSAGES = '5'
+__REQ_GET_BLOCK = '6'
+__REQ_DOWNLOAD_FINISHED = '7'
+__CTR_MSGS = {__REQ_GET:'Get message by id',
+              __REQ_LAST:'Get iDs of last N messages',
+              __REQ_PUBLISH:'Publish new message',
+              __REQ_HAS_MESSAGES: 'Check if client has any messages on outbox',
+              __REQ_GET_MESSAGES: 'Prepare the session, split data to blocks',
+              __REQ_GET_BLOCK: 'Get block number i',
+              __REQ_DOWNLOAD_FINISHED: 'Finish download'
               }
 # Responses--------------------------------------------------------------------
 __RSP_OK = '0'

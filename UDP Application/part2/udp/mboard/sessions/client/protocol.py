@@ -36,8 +36,8 @@ logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
 # Imports----------------------------------------------------------------------
 from udp.mboard.sessions.common import __REQ_PUBLISH, __MSG_FIELD_SEP, \
-    __RSP_OK, __REQ_LAST, __REQ_GET, __RSP_ERRTRANSM, __REQ_GET_DATA
-from udp.mboard.sessions.client.sessions import send_data, receive_data
+    __RSP_OK, __REQ_LAST, __REQ_GET, __RSP_ERRTRANSM, __REQ_HAS_MESSAGES, __REQ_GET_MESSAGES
+from udp.mboard.sessions.client.sessions import send_data, receive_data, download_blocks
 
 # Constants -------------------------------------------------------------------
 ___NAME = 'MBoard Protocol'
@@ -48,13 +48,15 @@ ___VENDOR = 'Copyright (c) 2016 DSLab'
 
 
 # Static functions ------------------------------------------------------------
-def __request(sock, srv, r_type, args):
+def __request(sock, srv, r_type, args, download=False):
     '''Send request to server, receive response
     @param sock: UDP socket, used to send/receive
     @param src: tuple ( IP, port ), server socket address
     @param r_type: string, request type
     @param args: list, request parameters/data
     '''
+
+    LOG.debug("###### MAKING NEW REQUEST ######")
     # Envelope request (prepare data unit)
     m = __MSG_FIELD_SEP.join([r_type] + map(str, args))
     # Send/Receive using sessions
@@ -86,10 +88,23 @@ def __request(sock, srv, r_type, args):
 
     LOG.debug("Client protocol request, trying to receive data from %s" % str(srv))
     err, r = receive_data(sock, srv)
+    LOG.debug('Client protocol received data %s' % str(r))
 
+    if download:
+        LOG.debug("Download branch in client protocol, r %s" % str(r))
+        r = download_blocks(sock, srv, r[0], r[1])
     # err = __RSP_OK if n > 0 else __RSP_ERRTRANSM
     return err, r
 
+def get_data_from(sock, srv):
+    LOG.debug("Get data initiated by client.protocol")
+    err, n = __request(sock, srv, __REQ_HAS_MESSAGES, ["I am a teapot"])
+    LOG.debug("Number of messages in server: %s" % str(n))
+    if n == 0:
+        return "No new messages in server"
+
+    err, resp = __request(sock, srv, __REQ_GET_MESSAGES, ["I am a teapot"], True)
+    return resp
 
 def publish(sock, srv, m):
     '''Publish message
@@ -131,7 +146,7 @@ def get(sock, srv, m_id):
     m = m[:3] + [__MSG_FIELD_SEP.join(m[3:])]
     return m if err == __RSP_OK else None
 
-
-def unread_messages(sock, srv):
-    err, data = __request(sock, srv, __REQ_GET_DATA)
-    return data if err == __RSP_OK else None
+#
+# def unread_messages(sock, srv):
+#     err, data = __request(sock, srv, __REQ_GET_DATA)
+#     return data if err == __RSP_OK else None
