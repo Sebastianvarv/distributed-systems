@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from socket import AF_INET, SOCK_STREAM,  socket
+from socket import AF_INET, SOCK_STREAM, socket, SHUT_WR, error
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Homework 2 Client program started")
@@ -16,8 +16,7 @@ if __name__ == '__main__':
 
     # Client connects to server
     s = socket(AF_INET, SOCK_STREAM)
-    destination = ('127.0.0.1', 7777)
-    s.connect(destination)
+    s.connect(('127.0.0.1', 7777))
 
     print 'Connected to the server %s:%d' % s.getpeername()
     print 'Local end-point bound on %s:%d' % s.getsockname()
@@ -25,14 +24,18 @@ if __name__ == '__main__':
 
     # Client opens file for reading
 
-    msg = ""
-    with open(filepath, 'r') as f:
-        for line in f:
-            msg += line
-
-    s.sendall(msg)
-
-    print 'Sent message to %s:%d' % destination
+    f = open(filepath, 'rb')
+    part = f.read(1024)
+    while part:
+        try:
+            s.send(part)
+            part = f.read(1024)
+        except socket.error, e:
+            print "Connection terminated (Broken pipe)"
+            s.shutdown(SHUT_WR)
+            s.close()
+    s.shutdown(SHUT_WR)
+    f.close()
 
 
     raw_input('Press Enter to terminate ...')

@@ -26,33 +26,27 @@ if __name__ == '__main__':
     s = socket(AF_INET, SOCK_STREAM)
     s.bind(('127.0.0.1', 7777))
     s.listen(0)
-    print 'Socket is bounded and listening on %s:%d' % s.getsockname()
 
-    # Wait for a client to connect
-    client_socket, client_addr = s.accept()
-    print 'Client connected from %s:%d' % client_addr
+    while True:
+        print 'Server is listening new connections on %s:%d' % s.getsockname()
 
-    # Receiving the message,
-    # here we need to the socket API what is the size of the block
-    # that we are ready to receive at once
-    recv_buffer_length = 1024
+        dumpdir = args.dumpdir
 
-    print 'Waiting for message ...'
-    # Append message block by block till terminator is found
-    dumpdir = args.dumpdir
-    filepath = dumpdir + "/" + str(uuid.uuid4()) + ".txt"
-    print "Filepath:", filepath
+        # Wait for a client to connect
+        client_socket, client_addr = s.accept()
+        print 'Client connected from :', client_addr
 
-    with open(filepath, 'w+') as f:
-        while True:
-            print "1"
-            m = client_socket.recv(recv_buffer_length)
-            print "received text block :", m
-            if len(m) > 0:
-                f.write(m)
-                print "Wrote text block to file :", filepath
-            else:
-                break
+        filepath = dumpdir + "/" + str(uuid.uuid4()) + ".txt"
+        print "Filepath:", filepath
+        f = open(filepath, 'wb')
+
+        len_buffer = 1024
+        part = client_socket.recv(len_buffer)
+        while part:
+            f.write(part)
+            print "Received filepart and wrote to output"
+            part = client_socket.recv(len_buffer)
+        f.close()
 
     # print 'Total length %d bytes: [%s]' % (len(message), message)
 
