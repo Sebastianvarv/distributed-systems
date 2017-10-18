@@ -5,7 +5,8 @@ import platform
 from argparse import ArgumentParser
 from socket import AF_INET, SOCK_STREAM, socket, SHUT_WR
 
-from common import __REQ_SEND_FILENAME_AND_SIZE, __MSG_FIELD_SEP, __RSP_FILEEXISTS, __RSP_OK, __RSP_DISKSPACE_ERR
+from common import __REQ_SEND_FILENAME_AND_SIZE, __MSG_FIELD_SEP, __RSP_FILEEXISTS, __RSP_OK, __RSP_DISKSPACE_ERR, \
+    __REQ_LISTFILES, __REQ_DOWNLOAD, __RSP_NO_SUCH_FILE
 
 
 def file_exists(filename, dump_dir):
@@ -22,6 +23,21 @@ def download_file(dumpdir, filename, client):
         print "Received filepart and wrote to output"
         part = client.recv(len_buffer)
     f.close()
+
+
+def serve_file(dumpdir, filename, client):
+    f = open((dumpdir + "/" + filename), 'rb')
+    part = f.read(1024)
+    while part:
+        try:
+            client.send(part)
+            part = f.read(1024)
+        except socket.error as e:
+            print "Connection terminated (Broken pipe)"
+            client.shutdown(SHUT_WR)
+            client.close()
+    client.shutdown(SHUT_WR)
+    client.close()
 
 
 def get_free_space_byte(dirname):
@@ -41,8 +57,8 @@ if __name__ == '__main__':
 
     parser = ArgumentParser(description="Homework 2 Server program started")
 
-    parser.add_argument('-d', '--dumpdir', \
-                        help='Directory to dump files', \
+    parser.add_argument('-d', '--dumpdir',
+                        help='Directory to dump files',
                         required=False,
                         default="server_dump")
 
@@ -51,7 +67,7 @@ if __name__ == '__main__':
 
     # Creating a TCP/IP socket
     s = socket(AF_INET, SOCK_STREAM)
-    s.bind(('127.0.0.1', 7777))
+    s.bind(('127.0.0.1', 7778))
     s.listen(0)
 
     while True:
@@ -78,6 +94,17 @@ if __name__ == '__main__':
                         client_socket.send(__RSP_OK)
                         download_file(dumpdir, filename, client_socket)
                         print "Downloaded file: ", filename
+            elif header == __REQ_LISTFILES:
+                files = os.listdir(dumpdir)
+                client_socket.send(str(files))
+            elif header == __REQ_DOWNLOAD:
+                filename = msg
+                if os.path.isfile(dumpdir + "/" + filename):
+                    client_socket.send(__RSP_OK + __MSG_FIELD_SEP)
+                    serve_file(dumpdir, filename, client_socket)
+                else:
+                    client_socket.send(__RSP_NO_SUCH_FILE)
+
         except KeyboardInterrupt:
             # Close the sesion
             # client_socket.close()
