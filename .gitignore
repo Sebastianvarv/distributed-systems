@@ -154,8 +154,8 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-.gitignore
 .idea/workspace.xml
+.idea/
 TCP Application/common.pyc
 TCP Application/server_dump/
 TCP Application/test.txt
@@ -173,3 +173,4 @@ UDP Application/part2/udp/mboard/sessions/common.pyc
 UDP Application/part2/udp/mboard/sessions/server/__init__.pyc
 UDP Application/part2/udp/mboard/sessions/server/protocol.pyc
 UDP Application/part2/udp/mboard/sessions/server/sessions.pyc
+Threads/alice.txt

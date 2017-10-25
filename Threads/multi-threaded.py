@@ -1,10 +1,10 @@
+import threading
 from argparse import ArgumentParser
 from collections import Counter
-
 from common import read_file, count_words
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description="Homework 3 Single threaded program")
+    parser = ArgumentParser(description="Homework 3 Multi threaded program")
 
     parser.add_argument('-o', '--occurrences', help='Count occurrences of the specified words', required=False)
     parser.add_argument('-m', '--mostfrequent', help='Calculate most frequent word', required=False,
@@ -19,11 +19,11 @@ if __name__ == '__main__':
     # Count word occurences
     counts = Counter()
     for filename in files.split():
-        count_words(read_file(filename), counts)
+        thread = threading.Thread(count_words(read_file(filename), counts))
+        thread.start()
 
     if occurrences:
         for word in occurrences.split():
             print word, counts[word]
-
     elif most_frequent:
         print counts.most_common(1)[0][0]
