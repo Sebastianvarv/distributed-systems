@@ -5,7 +5,6 @@ from common import read_file, count_words
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Homework 3 Multi threaded program")
-
     parser.add_argument('-o', '--occurrences', help='Count occurrences of the specified words', required=False)
     parser.add_argument('-m', '--mostfrequent', help='Calculate most frequent word', required=False,
                         action='store_true')
