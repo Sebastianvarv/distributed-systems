@@ -64,11 +64,11 @@ if __name__ == '__main__':
     occurrences = args.occurrences
     most_frequent = args.mostfrequent
     files = args.files
-    count = Counter()
+    counts = Counter()
 
     q = Queue()
     files_list = files.split()
-    cons = threading.Thread(name='Consumer', target=consumer, args=(q, count, files_list))
+    cons = threading.Thread(name='Consumer', target=consumer, args=(q, counts, files_list))
     prod = threading.Thread(name='Producer', target=producer, args=(q, files_list))
 
     cons.start()
@@ -76,3 +76,9 @@ if __name__ == '__main__':
 
     cons.join()
     prod.join()
+
+    if occurrences:
+        for word in occurrences.split():
+            print word, counts[word]
+    elif most_frequent:
+        print counts.most_common(1)[0][0]
