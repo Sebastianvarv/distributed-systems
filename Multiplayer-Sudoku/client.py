@@ -36,15 +36,3 @@ def req_get_games(sock):
 def req_create_game(sock, username):
     pass
 
-
-if __name__ == '__main__':
-    pass
-    # Get server port
-    port = 7000
-    # Get nickname
-    nickname = 'SebastianOnKala'
-    # Create game
-    sock = connect_server(port)
-
-    reg_user(sock, nickname)
-    req_get_games(sock)

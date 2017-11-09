@@ -3,13 +3,14 @@ from Tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM, RIGHT, LEFT, E
 from ufopornoo import SudokuUI, SudokuGame
 import time
 
-#Input sizes
+# Input sizes
 INPUT_WIDTH = 200
 INPUT_HEIGHT = 80
 
 MARGIN = 20  # Pixels around the board
 SIDE = 50  # Width of every board cell.
 SUDOKU_WIDTH = SUDOKU_HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
+
 
 class ConnectionUI(Frame):
     nickname = None
@@ -72,7 +73,7 @@ class ConnectionUI(Frame):
             self.port = port
 
 
-if __name__ == '__main__':
+def main():
     root = Tk()
     client_window = ConnectionUI(root)
     root.geometry("%dx%d" % (INPUT_WIDTH, INPUT_HEIGHT + 40))
@@ -81,17 +82,17 @@ if __name__ == '__main__':
         if client_window.port is not None and client_window.nickname is not None:
             print "we're fucking dead get the fuck out of here shit!"
             client_window.destroy()
-            break
+            return client_window.port, client_window.nickname
 
-    board_name = "debug"
-    with open('.\%s.sudoku' % board_name, 'r') as boards_file:
-        game = SudokuGame(boards_file)
-        game.start()
-
-        sudoku_ui = SudokuUI(root, game)
-        root.geometry("%dx%d" % (SUDOKU_WIDTH, SUDOKU_HEIGHT + 40))
-        while True:
-            root.update()
-            sudoku_ui.destroy()
-            time.sleep(5)
-            break
+            # board_name = "debug"
+            # with open('.\%s.sudoku' % board_name, 'r') as boards_file:
+            #     game = SudokuGame(boards_file)
+            #     game.start()
+            #
+            #     sudoku_ui = SudokuUI(root, game)
+            #     root.geometry("%dx%d" % (SUDOKU_WIDTH, SUDOKU_HEIGHT + 40))
+            #     while True:
+            #         root.update()
+            #         sudoku_ui.destroy()
+            #         time.sleep(5)
+            #         break
