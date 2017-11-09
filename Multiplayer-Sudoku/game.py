@@ -52,7 +52,5 @@ class Game:
                     return False
         return True
 
-    def add_player(self, nickname):
-        user_id = uuid.uuid4()
-        self.names[user_id] = user_id
-        self.scores[user_id] = 0
+    def add_player(self, player_id):
+        self.scores[player_id] = 0
