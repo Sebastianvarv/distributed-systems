@@ -8,20 +8,20 @@ __REQ_GET_GAMES = '3'
 # Set max players num, returns session id, adds client to game
 __REQ_CREATE_GAME = '4'
 # Send Player id, game room id to add player request
-__REQ_ADD_PLYER_TO_GAMEROOM = '5'
+__REQ_ADD_PLAYER_TO_GAMEROOM = '5'
 
-# Send req with game_id, (x,y) coord and val
+# Send req with game_id, (x,y) coord and val, returns board and current scores together, if game is over then return boolean True
 __REQ_MAKE_MOVE = '6'
-# Get board and current scores together, if game is over then return winner
-__REQ_GET_GAME = '7'
+# Initalize board, add players, make session (GAME)
+__REQ_INIT_GAME = '7'
 
 __CTR_MSGS = {__REQ_REG_USER: 'Register user with nickname',
               __REQ_CONNECT_SERVER_PORT: 'Connect game server port',
               __REQ_GET_GAMES: 'Get all game sessions (game rooms)',
               __REQ_CREATE_GAME: 'Create new game room',
-              __REQ_ADD_PLYER_TO_GAMEROOM: 'Add player to game room',
+              __REQ_ADD_PLAYER_TO_GAMEROOM: 'Add player to game room',
               __REQ_MAKE_MOVE: 'Player make move',
-              __REQ_GET_GAME: 'Return current game state with board and scores'
+              __REQ_INIT_GAME: 'Return current game state with board and scores'
               }
 # Responses--------------------------------------------------------------------
 __RSP_OK = '0'
