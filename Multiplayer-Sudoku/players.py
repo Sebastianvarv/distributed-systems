@@ -7,7 +7,7 @@ class Players:
         self.players = {}
 
     def reg_player(self, name):
-        player_id = uuid.uuid4()
+        player_id = str(uuid.uuid4())
         self.players[player_id] = name
         return player_id
 

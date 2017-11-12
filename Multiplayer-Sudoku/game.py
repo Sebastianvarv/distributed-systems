@@ -32,14 +32,14 @@ class Game:
         self.max_players = max_players
         self.game_started = False
 
-    def make_move(self, user_id, (x,y), value):
-        if valid_move((x,y), value):
+    def make_move(self, user_id, x, y, value):
+        if valid_move(x, y, value):
             self.scores[user_id] += 1
             return 1
         self.scores[user_id] -= 1
         return 0
             
-    def valid_move(self, (x,y), value):
+    def valid_move(self, x, y, value):
         if solution[x][y] == value:
             return True
         return False
