@@ -9,8 +9,8 @@ if __name__ == "__main__":
     print(port, nickname)
 
     # Dummy shit
-    #sock = connect_server(port)
-    #reg_user(sock, nickname)
+    sock = connect_server(port)
+    reg_user(sock, nickname)
 
     initiate_lobby(root)
     #games = req_get_games(sock)

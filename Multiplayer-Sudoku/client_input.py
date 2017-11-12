@@ -56,7 +56,7 @@ class ConnectionUI(Frame):
         if 8 >= len(nickname) > 0:
             if ' ' not in nickname:
                 name_ok = True
-                print "Spank me " + nickname
+                print "Name correct: " + nickname
         else:
             print "Bad name."
 
@@ -65,14 +65,12 @@ class ConnectionUI(Frame):
         except (ValueError, TypeError):
             port = "-1"
 
-        print type(port)
-
         if isinstance(port, int):
             if 1000 < port < 65535:
                 port_ok = True
                 print "Ok port."
         else:
-            print "Bad doggos."
+            print "Bad port"
 
         if name_ok and port_ok:
             self.nickname = nickname

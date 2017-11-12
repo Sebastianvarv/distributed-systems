@@ -1,14 +1,16 @@
 # Requests --------------------------------------------------------------------
-# User enters nick name, app checks if it is valid and not taken
+# User enters nick name, app generates id and registers user
 __REQ_REG_USER = '1'
 # Connect to server with port number
 __REQ_CONNECT_SERVER_PORT = '2'
 # Return existing sessions of games (id, number of players, max players)
 __REQ_GET_GAMES = '3'
-# Set max players num, returns session id, adds client to game
+# Set max players num, returns session id, adds client to game, sends parameters (player_id, max_players)
 __REQ_CREATE_GAME = '4'
 # Send Player id, game room id to add player request
 __REQ_ADD_PLAYER_TO_GAMEROOM = '5'
+# Send notification that game has started
+__REQ_GAME_STARTED = '6'
 
 # Send req with game_id, (x,y) coord and val, returns board and current scores together, if game is over then return boolean True
 __REQ_MAKE_MOVE = '6'
@@ -21,7 +23,8 @@ __CTR_MSGS = {__REQ_REG_USER: 'Register user with nickname',
               __REQ_CREATE_GAME: 'Create new game room',
               __REQ_ADD_PLAYER_TO_GAMEROOM: 'Add player to game room',
               __REQ_MAKE_MOVE: 'Player make move',
-              __REQ_INIT_GAME: 'Return current game state with board and scores'
+              __REQ_INIT_GAME: 'Return current game state with board and scores',
+              __REQ_GAME_STARTED: 'Game has started'
               }
 # Responses--------------------------------------------------------------------
 __RSP_OK = '0'
