@@ -13,7 +13,6 @@ def connect_server(server_port):
     sock.send("")
     return sock
 
-
 def reg_user(sock, username):
     sock.send(__REQ_REG_USER + __MSG_FIELD_SEP + username)
     resp = sock.recv(1024)
@@ -37,7 +36,9 @@ def req_get_games(sock):
     if header != __RSP_OK:
         print("miskit laks get games katki")
         #         TODO: handle error get games
-
+    else:
+        print "Response req_get_games:" + resp
+        return resp
 
 def req_create_game(sock, username):
     pass
