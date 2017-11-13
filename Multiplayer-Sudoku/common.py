@@ -11,11 +11,12 @@ __REQ_CREATE_GAME = '4'
 __REQ_ADD_PLAYER_TO_GAMEROOM = '5'
 # Send notification that game has started
 __REQ_GAME_STARTED = '6'
-
 # Send req with player_id, game_id, (x,y) coord and val, returns board and current scores together, if game is over then return boolean True
 __REQ_MAKE_MOVE = '6'
 # Initalize board, add players, make session (GAME)
 __REQ_INIT_GAME = '7'
+# Get game state gives game_id, returns game state
+__REQ_GET_STATE = '8'
 
 __CTR_MSGS = {__REQ_REG_USER: 'Register user with nickname',
               __REQ_CONNECT_SERVER_PORT: 'Connect game server port',
@@ -24,7 +25,8 @@ __CTR_MSGS = {__REQ_REG_USER: 'Register user with nickname',
               __REQ_ADD_PLAYER_TO_GAMEROOM: 'Add player to game room',
               __REQ_MAKE_MOVE: 'Player make move',
               __REQ_INIT_GAME: 'Return current game state with board and scores',
-              __REQ_GAME_STARTED: 'Game has started'
+              __REQ_GAME_STARTED: 'Game has started',
+              __REQ_GET_STATE: 'Get current game state'
               }
 # Responses--------------------------------------------------------------------
 __RSP_OK = '0'

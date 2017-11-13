@@ -11,7 +11,7 @@ __GAMES = Games()
 
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_CREATE_GAME, __REQ_ADD_PLAYER_TO_GAMEROOM, __REQ_MAKE_MOVE, \
-    __REQ_INIT_GAME, __RSP_OK, __REQ_CONNECT_SERVER_PORT, __RSP_GAME_FULL_ERROR
+    __REQ_INIT_GAME, __RSP_OK, __REQ_CONNECT_SERVER_PORT, __RSP_GAME_FULL_ERROR, __REQ_GET_STATE
 
 if __name__ == '__main__':
     parser = ArgumentParser(description="Sudoku server")
@@ -59,7 +59,8 @@ if __name__ == '__main__':
                 game = __GAMES.get_game(game_uid)
                 game.add_player(player_uid)
 
-                client_socket.send(__RSP_OK + __MSG_FIELD_SEP + game_uid)
+                state = pickle.dumps(game.get_state(__PLAYERS))
+                client_socket.send(__RSP_OK + __MSG_FIELD_SEP + game_uid + __MSG_FIELD_SEP + state)
 
 
             elif msg_header == __REQ_ADD_PLAYER_TO_GAMEROOM:
@@ -83,11 +84,15 @@ if __name__ == '__main__':
                 state = pickle.dumps(game.get_state(__PLAYERS))
                 client_socket.send(__RSP_OK + __MSG_FIELD_SEP + state)
 
-            elif msg_header == __REQ_INIT_GAME:
-                print("Initialising game", msg)
-
+            elif msg_header == __REQ_GET_STATE:
+                print("Get state", msg)
+                game_id = msg
+                game = __GAMES.get_game(game_id)
+                state = pickle.dumps(game.get_state(__PLAYERS))
+                client_socket.send(__RSP_OK + __MSG_FIELD_SEP + state)
 
             elif msg_header == __REQ_CONNECT_SERVER_PORT:
                 client_socket.send(__RSP_OK)
+
         except KeyboardInterrupt:
             sys.exit()
