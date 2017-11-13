@@ -106,8 +106,8 @@ def req_make_move(player_id, game_id, x_coord, y_coord, val, server_port):
     :return: state object which is [board, [(name, score)]]
     """
     sock = connect_server(server_port)
-    sock.send(__REQ_MAKE_MOVE + __MSG_FIELD_SEP + player_id + __MSG_FIELD_SEP + game_id + __MSG_FIELD_SEP + x_coord +
-              __MSG_FIELD_SEP + y_coord + __MSG_FIELD_SEP + val)
+    sock.send(__REQ_MAKE_MOVE + __MSG_FIELD_SEP + str(player_id) + __MSG_FIELD_SEP + str(game_id) + __MSG_FIELD_SEP +
+              str(x_coord) + __MSG_FIELD_SEP + str(y_coord) + __MSG_FIELD_SEP + str(val))
 
     resp = sock.recv(1024)
     header, resp = resp.split(__MSG_FIELD_SEP, 1)

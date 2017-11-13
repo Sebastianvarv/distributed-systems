@@ -71,7 +71,7 @@ class SudokuUI(Frame):
             # if cell was selected already - deselect it
             if (row, col) == (self.row, self.col):
                 self.row, self.col = -1, -1
-            elif self.game.puzzle[row][col] == 0:
+            elif self.game.board[row][col] == 0:
                 self.row, self.col = row, col
 
         self.__draw_cursor()
@@ -89,17 +89,42 @@ class SudokuUI(Frame):
             )
 
     def __key_pressed(self, event):
-        if self.game.game_over:
-            return
         if self.row >= 0 and self.col >= 0 and event.char in "1234567890":
-            self.game.puzzle[self.row][self.col] = int(event.char)
+            self.game.board[self.row][self.col] = int(event.char)
             self.col, self.row = -1, -1
             self.__draw_puzzle()
             self.__draw_cursor()
 
     def update_board(self, root, board):
+        return_val = None
+
+        # Check if user has added any values
+        if self.game.board != board:
+            change_row = -1
+            change_column = -1
+
+            # Find where the user added elements
+            for i, row in enumerate(self.game.board):
+                if row != board[i]:
+                    change_row = i
+
+                    for j, elem in enumerate(row):
+                        if elem != board[i][j]:
+                            # Found the changed element
+                            change_column = j
+                            break
+
+            change_value = self.game.board[change_row][change_column]
+
+            if change_row == -1 and change_column == -1 and change_value == 0:
+                raise SudokuError("Something has gone to shit, can't find the edited value")
+
+            return_val = (change_row, change_column, change_value)
+
         self.game.update_board(board)
         root.update()
+
+        return return_val
 
 
 class SudokuBoard(object):
@@ -144,16 +169,3 @@ class SudokuError(Exception):
     An application specific error.
     """
     pass
-
-#
-# if __name__ == '__main__':
-#     board_name = "debug"
-#
-#     with open('.\%s.sudoku' % board_name, 'r') as boards_file:
-#         game = SudokuGame(boards_file)
-#         game.start()
-#
-#         root = Tk()
-#         SudokuUI(root, game)
-#         root.geometry("%dx%d" % (WIDTH, HEIGHT + 40))
-#         root.mainloop()

@@ -31,13 +31,24 @@ def refresh_lobby(root, port, room_window):
         refresh_lobby(root, port, room_window)
 
 
-def refresh_game(sudoku_ui, game_id, port, root):
-    game_state = req_get_state(game_id, port)
+def refresh_game_state(game_state):
     board, scores, game_progression = game_state
-    sudoku_ui.update_board(root, board)
+    board_changed = sudoku_ui.update_board(root, board)
+    LOG.debug("sudoku game updating gave back " + str(board_changed))
 
-    time.sleep(0.2)
-    refresh_game(sudoku_ui, game_id, port, root)
+    return board_changed
+
+
+def refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed=None):
+    if board_changed is not None:
+        game_state = req_make_move(user_id, game_id, board_changed[0], board_changed[1], board_changed[2], port)
+    else:
+        game_state = req_get_state(game_id, port)
+
+    board_changed = refresh_game_state(game_state)
+
+    time.sleep(1)
+    refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed)
 
 
 if __name__ == "__main__":
@@ -85,4 +96,4 @@ if __name__ == "__main__":
     sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
     root.geometry("%dx%d" % (SudokuGameGUI.WIDTH, SudokuGameGUI.HEIGHT))
 
-    sudoku_refresh_thread = threading.Thread(target=refresh_game(sudoku_ui, game_id, port, root))
+    sudoku_refresh_thread = threading.Thread(target=refresh_game(sudoku_ui, game_id, port, root, user_id))
