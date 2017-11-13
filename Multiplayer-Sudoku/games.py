@@ -1,9 +1,8 @@
-
 import uuid
 from game import Game
 
-class Games:
 
+class Games:
     def __init__(self):
         self.games = {}
 
