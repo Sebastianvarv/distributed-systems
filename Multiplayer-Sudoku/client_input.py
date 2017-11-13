@@ -12,7 +12,7 @@ INPUT_WIDTH = 300
 INPUT_HEIGHT = 80
 
 # Lobby sizes
-LOBBY_WIDTH = 350
+LOBBY_WIDTH = 400
 LOBBY_HEIGHT = 400
 
 class ConnectionUI(Frame):
@@ -93,7 +93,7 @@ class LobbyUI(Frame):
         self.lobby_list = Treeview(self, columns=('room', 'players'))
         self.lobby_list['show'] = 'headings'
         self.lobby_list.heading('room', text='Room ID')
-        self.lobby_list.column('room', width=200, anchor=CENTER)
+        self.lobby_list.column('room', width=250, anchor=CENTER)
         self.lobby_list.heading('players', text='Players')
         self.lobby_list.column('players', width=100, anchor=CENTER)
         self.lobby_list.grid(row=1, column=0, columnspan=2, rowspan=2, padx=20, pady=(10, 0))
