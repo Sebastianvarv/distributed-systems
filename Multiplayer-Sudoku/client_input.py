@@ -1,6 +1,5 @@
 from Tkinter import Frame, Button, BOTH, Entry, Label, CENTER
 from ttk import Treeview
-from ufopornoo import SudokuUI, SudokuGame
 import logging
 
 # Setup logging
