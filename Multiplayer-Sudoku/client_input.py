@@ -120,12 +120,16 @@ class LobbyUI(Frame):
         Handle lobby connection button."""
         LOG.debug('Lobby connect button has been pressed.')
         current_item = self.lobby_list.focus()
+        selected_id = None
+
         if current_item is not None:
             # Select game column value from item values dictionary.
             selected_game = self.lobby_list.item(current_item)['values'][0]
             selected_id = selected_game.split(' ')[1]
-            LOG.debug('Player wishes to join game ' + str(selected_id))
-            self.action = ('select', selected_id)
+
+            if selected_id is not None:
+                LOG.debug('Player wishes to join game ' + str(selected_id))
+                self.action = ('select', selected_id)
 
 
     def __create_game(self):
