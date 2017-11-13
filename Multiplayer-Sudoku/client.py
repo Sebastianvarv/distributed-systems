@@ -1,3 +1,4 @@
+import pickle
 from argparse import ArgumentParser
 from socket import socket, AF_INET, SOCK_STREAM
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
@@ -5,6 +6,7 @@ from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_INIT_GAME, __MSG_END, __RSP_OK, __REQ_CONNECT_SERVER_PORT
 
 __USER_ID = None
+
 
 def connect_server(server_port):
     server = ('127.0.0.1', server_port)
@@ -14,7 +16,8 @@ def connect_server(server_port):
     return sock
 
 
-def reg_user(sock, username):
+def reg_user(username, server_port):
+    sock = connect_server(server_port)
     sock.send(__REQ_REG_USER + __MSG_FIELD_SEP + username)
     resp = sock.recv(1024)
 
@@ -25,20 +28,26 @@ def reg_user(sock, username):
     else:
         print("Kasutaja id peaks olema", resp)
         __USER_ID = resp
+        return __USER_ID
 
 
 # TODO: handle error reg user
 
 
-def req_get_games(sock):
+def req_get_games(server_port):
+    print "joudsin get gamesi"
+    sock = connect_server(server_port)
     sock.send(__REQ_GET_GAMES + __MSG_FIELD_SEP)
     resp = sock.recv(1024)
     header, resp = resp.split(__MSG_FIELD_SEP, 1)
     if header != __RSP_OK:
         print("miskit laks get games katki")
         #         TODO: handle error get games
+    else:
+        print "Response req_get_games:" + resp
+        resp = pickle.loads(resp)
+        return resp
 
 
 def req_create_game(sock, username):
     pass
-

@@ -1,11 +1,13 @@
 from argparse import ArgumentParser
 from socket import socket, AF_INET, SOCK_STREAM
-
+import pickle
 import sys
 
+from games import Games
 from players import Players
 
 __PLAYERS = Players()
+__GAMES = Games()
 
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_CREATE_GAME, __REQ_ADD_PLAYER_TO_GAMEROOM, __REQ_MAKE_MOVE, \
@@ -51,6 +53,12 @@ if __name__ == '__main__':
 
             elif msg_header == __REQ_GET_GAMES:
                 print("Get games", msg)
+                resp = __GAMES.get_tuple()
+                resp = pickle.dumps(resp)
+                print "server get games resp:" + str(resp)
+
+                client_socket.send(__RSP_OK + __MSG_FIELD_SEP + resp)
+
             elif msg_header == __REQ_CREATE_GAME:
                 print("Create game", msg)
 
