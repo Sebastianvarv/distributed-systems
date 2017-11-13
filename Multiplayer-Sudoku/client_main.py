@@ -9,9 +9,11 @@ if __name__ == "__main__":
     print(port, nickname)
 
     # Dummy shit
-    reg_user(nickname, port)
+    player_id = reg_user(nickname, port)
 
     initiate_lobby(root)
+    # (room_id, num players, max players)
+    game_id = req_create_game(player_id, 4, port)
     games = req_get_games(port)
     # (room_id, num players, max players)
     # games = [(1, 3, 4), (2, 1, 5), (3, 3, 3)]

@@ -35,9 +35,9 @@ class Game:
     def make_move(self, user_id, x, y, value):
         if self.valid_move(x, y, value):
             self.scores[user_id] += 1
-            return 1
+            return True
         self.scores[user_id] -= 1
-        return 0
+        return False
             
     def valid_move(self, x, y, value):
         if self.solution[x][y] == value:
@@ -51,10 +51,24 @@ class Game:
                     return False
         return True
 
+    # Add new player if possible - returns True if added, False if not
     def add_player(self, player_id):
-        self.scores[player_id] = 0
-        if len(self.scores) == self.max_players:
-            self.game_started = True
+        if len(self.scores) < self.max_players:
+            self.scores[player_id] = 0
+            if len(self.scores) == self.max_players:
+                self.game_started = True
+            return True
+        return False
 
     def get_num_players(self):
         return len(self.scores)
+
+    def remove_player(self, player_id):
+        self.scores.pop(player_id, None)
+
+    def get_state(self, players):
+        names_scores = []
+        for uid, score in self.scores.items():
+            name = players.get_player_name(uid)
+            names_scores.append((name, score))
+        return [self.board, names_scores]

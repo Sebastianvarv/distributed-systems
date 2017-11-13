@@ -12,7 +12,7 @@ __REQ_ADD_PLAYER_TO_GAMEROOM = '5'
 # Send notification that game has started
 __REQ_GAME_STARTED = '6'
 
-# Send req with game_id, (x,y) coord and val, returns board and current scores together, if game is over then return boolean True
+# Send req with player_id, game_id, (x,y) coord and val, returns board and current scores together, if game is over then return boolean True
 __REQ_MAKE_MOVE = '6'
 # Initalize board, add players, make session (GAME)
 __REQ_INIT_GAME = '7'

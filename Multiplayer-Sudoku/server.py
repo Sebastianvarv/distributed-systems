@@ -61,11 +61,24 @@ if __name__ == '__main__':
 
             elif msg_header == __REQ_CREATE_GAME:
                 print("Create game", msg)
+                player_uid, max_players = msg.split(__MSG_FIELD_SEP, 1)
+                game_uid = __GAMES.create_game(max_players)
+                game = __GAMES.get_game(game_uid)
+                game.add_player(player_uid)
+
+                client_socket.send(__RSP_OK + __MSG_FIELD_SEP + game_uid)
+
 
             elif msg_header == __REQ_ADD_PLAYER_TO_GAMEROOM:
                 print("Add player to gameroom", msg)
             elif msg_header == __REQ_MAKE_MOVE:
                 print("Making a mooooove", msg)
+                player_id, game_id, x_coord, y_coord, val = msg.split(__MSG_FIELD_SEP, 4)
+                game = __GAMES.get_game(game_id)
+                game.make_move(player_id, x_coord, y_coord, val)
+
+
+
             elif msg_header == __REQ_INIT_GAME:
                 print("Initialising game", msg)
             elif msg_header == __REQ_CONNECT_SERVER_PORT:
