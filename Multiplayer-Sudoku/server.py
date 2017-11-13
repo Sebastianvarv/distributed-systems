@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from socket import socket, AF_INET, SOCK_STREAM
-
+import pickle
 import sys
 
 from games import Games
@@ -54,7 +54,8 @@ if __name__ == '__main__':
             elif msg_header == __REQ_GET_GAMES:
                 print("Get games", msg)
                 resp = __GAMES.get_tuple()
-                print "server get games resp:" + resp
+                resp = pickle.dumps(resp)
+                print "server get games resp:" + str(resp)
 
                 client_socket.send(__RSP_OK + __MSG_FIELD_SEP + resp)
 

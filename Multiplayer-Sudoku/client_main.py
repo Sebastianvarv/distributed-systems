@@ -9,11 +9,10 @@ if __name__ == "__main__":
     print(port, nickname)
 
     # Dummy shit
-    sock = connect_server(port)
-    reg_user(sock, nickname)
+    reg_user(nickname, port)
 
     initiate_lobby(root)
-    games = req_get_games(sock)
+    games = req_get_games(port)
     # (room_id, num players, max players)
     # games = [(1, 3, 4), (2, 1, 5), (3, 3, 3)]
     # \Dummy shit
