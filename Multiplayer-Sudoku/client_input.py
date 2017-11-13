@@ -1,5 +1,6 @@
 from Tkinter import Frame, Button, BOTH, Entry, Label, CENTER
 from ttk import Treeview
+import tkMessageBox
 from ufopornoo import SudokuUI, SudokuGame
 import logging
 
@@ -56,9 +57,21 @@ class ConnectionUI(Frame):
             if ' ' not in nickname:
                 name_ok = True
                 LOG.debug('Player created: ' + nickname)
-        else:
-            # replace with warning window.
-            LOG.error('Bad name input.')
+            else:
+                tkMessageBox.showwarning(
+                    "Name error",
+                    "Player name cannot contain space."
+                )
+        elif len(nickname) <= 0:
+            tkMessageBox.showwarning(
+                "Name error",
+                "Player name cannot be empty."
+            )
+        elif len(nickname) > 8:
+            tkMessageBox.showwarning(
+                "Name error",
+                "Player name has to be less than 9 characters long."
+            )
 
         try:
             port = int(self.entry_port.get())
@@ -69,9 +82,16 @@ class ConnectionUI(Frame):
             if 1000 < port < 65535:
                 port_ok = True
                 LOG.debug('Ok port.')
+            else:
+                tkMessageBox.showwarning(
+                    "Port error",
+                    "Port number has to be between 1000 and 65535."
+                )
         else:
-            # replace with warning window.
-            LOG.error('Bad port')
+            tkMessageBox.showwarning(
+                "Port error",
+                "Port number has to be an integer."
+            )
 
         if name_ok and port_ok:
             self.nickname = nickname
@@ -117,13 +137,18 @@ class LobbyUI(Frame):
         current_item = self.lobby_list.focus()
         selected_id = None
 
-        if current_item is not None:
+        if current_item is not None and current_item.strip() != '':
             # Select game column value from item values dictionary.
             selected_id = self.lobby_list.item(current_item)['values'][0]
+            LOG.debug('Player wishes to join game ' + str(selected_id))
 
             if selected_id is not None:
-                LOG.debug('Player wishes to join game ' + str(selected_id))
                 self.action = ('select', selected_id)
+        else:
+            tkMessageBox.showwarning(
+                "Connection error",
+                "Please select a game from the lobby to join."
+            )
 
 
     def __create_game(self):
@@ -135,13 +160,21 @@ class LobbyUI(Frame):
             max_count = int(self.max_players.get())
         except (ValueError, TypeError):
             max_count = -1
+            tkMessageBox.showwarning(
+                "Input error",
+                "Max player count has to be an integer."
+            )
 
         if isinstance(max_count, int):
             if max_count >= 2:
                 max_ok = True
                 LOG.debug('Ok max player count.')
-        else:
-            LOG.error('Bad max count.')
+            else:
+                tkMessageBox.showwarning(
+                    "Input error",
+                    "Max player count has to be larger than 2."
+                )
+                LOG.error('Bad max count.')
 
         if max_ok:
             self.action = ('create', max_count)
