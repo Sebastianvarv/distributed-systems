@@ -120,14 +120,12 @@ class LobbyUI(Frame):
         Handle lobby connection button."""
         LOG.debug('Lobby connect button has been pressed.')
         current_item = self.lobby_list.focus()
-        print current_item
         if current_item is not None:
-            # selection = (room_id, )
-            self.action = ('select', current_item[0])
-
-            #list_selection = self.__get_current_selection()
-            # do something related to destroying the window and returning selected lobby data.
-            #self.selection = list_selection
+            # Select game column value from item values dictionary.
+            selected_game = self.lobby_list.item(current_item)['values'][0]
+            selected_id = selected_game.split(' ')[1]
+            LOG.debug('Player wishes to join game ' + str(selected_id))
+            self.action = ('select', selected_id)
 
 
     def __create_game(self):
