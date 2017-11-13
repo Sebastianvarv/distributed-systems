@@ -13,6 +13,8 @@ class SudokuUI(Frame):
         self.parent = parent
 
         self.row, self.col = -1, -1
+        self.new_entry = None
+        self.previous_guess = None
 
         self.__initUI()
 
@@ -90,39 +92,39 @@ class SudokuUI(Frame):
 
     def __key_pressed(self, event):
         if self.row >= 0 and self.col >= 0 and event.char in "1234567890":
-            self.game.board[self.row][self.col] = int(event.char)
+            # self.game.board[self.row][self.col] = int(event.char)
+            self.new_entry = (self.row, self.col, int(event.char))
             self.col, self.row = -1, -1
             self.__draw_puzzle()
             self.__draw_cursor()
 
     def update_board(self, root, board):
+
+        # If previous guess was not correct flash it red
+        if self.previous_guess is not None and board[self.previous_guess[0]][self.previous_guess[1]] != \
+                self.previous_guess[2]:
+            row, col, _ = self.previous_guess
+            x0 = MARGIN + col * SIDE + 1
+            y0 = MARGIN + row * SIDE + 1
+            x1 = MARGIN + (col + 1) * SIDE - 1
+            y1 = MARGIN + (row + 1) * SIDE - 1
+            self.canvas.create_rectangle(x0, y0, x1, y1, fill="red", tags="fail")
+        else:
+            self.canvas.delete("fail")
+
+        # Initiate return value to none, update the board and draw it
         return_val = None
-
-        # Check if user has added any values
-        if self.game.board != board:
-            change_row = -1
-            change_column = -1
-
-            # Find where the user added elements
-            for i, row in enumerate(self.game.board):
-                if row != board[i]:
-                    change_row = i
-
-                    for j, elem in enumerate(row):
-                        if elem != board[i][j]:
-                            # Found the changed element
-                            change_column = j
-                            break
-
-            change_value = self.game.board[change_row][change_column]
-
-            if change_row == -1 and change_column == -1 and change_value == 0:
-                raise SudokuError("Something has gone to shit, can't find the edited value")
-
-            return_val = (change_row, change_column, change_value)
-
         self.game.update_board(board)
+        self.__draw_puzzle()
         root.update()
+
+        # If user has entered anything in between, write it into the return value and previous guess and return
+        if self.new_entry is not None:
+            return_val = self.new_entry
+            self.previous_guess = self.new_entry
+            self.new_entry = None
+        else:
+            self.previous_guess = None
 
         return return_val
 
