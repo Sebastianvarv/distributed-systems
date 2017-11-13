@@ -35,6 +35,10 @@ def refresh_game_state(game_state):
     board, scores, game_progression = game_state
     board_changed = sudoku_ui.update_board(root, board, game_progression)
 
+    if game_progression == 2:
+        # TODO: If game is finished use a different handler perhaps?
+        pass
+
     return board_changed
 
 
