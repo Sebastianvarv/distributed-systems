@@ -147,17 +147,20 @@ class LobbyUI(Frame):
         :param games:
         """
         previous_selection = self.lobby_list.selection()
+        prev_item = None
         if len(previous_selection) > 0:
-            print previous_selection[0]
+            prev_item = self.lobby_list.item(previous_selection[0])
+            print prev_item
 
         self.lobby_list.delete(*self.lobby_list.get_children())
         for game in games:
             self.lobby_list.insert('', 'end', values=("Game " + str(game[0]), str(game[1]) + "/" + str(game[2])))
 
-        if len(previous_selection) > 0:
-            self.lobby_list.selection_set(previous_selection[0])
-            self.lobby_list.focus_set()
-            self.lobby_list.focus(previous_selection[0])
+        if prev_item is not None:
+            for item in self.lobby_list.get_children():
+                if self.lobby_list.item(item) == prev_item:
+                    self.lobby_list.selection_set(item)
+                    self.lobby_list.focus(item)
 
 
 def input_main(root):
