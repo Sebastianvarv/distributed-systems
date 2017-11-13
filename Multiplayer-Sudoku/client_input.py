@@ -8,7 +8,7 @@ INPUT_WIDTH = 300
 INPUT_HEIGHT = 80
 
 # Lobby sizes
-LOBBY_WIDTH = 500
+LOBBY_WIDTH = 650
 LOBBY_HEIGHT = 400
 
 # Sudoku sizes
@@ -117,9 +117,9 @@ class LobbyUI(Frame):
             # selection = (room_id, )
             self.action = ('select', current_item[0])
 
-        #list_selection = self.__get_current_selection()
-        # do something related to destroying the window and returning selected lobby data.
-        #self.selection = list_selection
+            #list_selection = self.__get_current_selection()
+            # do something related to destroying the window and returning selected lobby data.
+            #self.selection = list_selection
 
 
     def __create_game(self):
@@ -146,10 +146,18 @@ class LobbyUI(Frame):
         Method to re-populate the lobby list every poll.
         :param games:
         """
-        self.lobby_list.delete(*self.lobby_list.get_children())
+        previous_selection = self.lobby_list.selection()
+        if len(previous_selection) > 0:
+            print previous_selection[0]
 
+        self.lobby_list.delete(*self.lobby_list.get_children())
         for game in games:
             self.lobby_list.insert('', 'end', values=("Game " + str(game[0]), str(game[1]) + "/" + str(game[2])))
+
+        if len(previous_selection) > 0:
+            self.lobby_list.selection_set(previous_selection[0])
+            self.lobby_list.focus_set()
+            self.lobby_list.focus(previous_selection[0])
 
 
 def input_main(root):

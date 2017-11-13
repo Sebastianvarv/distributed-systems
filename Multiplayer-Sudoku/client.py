@@ -39,7 +39,7 @@ def reg_user(username, server_port):
     sock.send(__REQ_REG_USER + __MSG_FIELD_SEP + username)
     resp = sock.recv(1024)
 
-    LOG.debug("Response is ", resp)
+    LOG.debug("Response is " + str(resp))
     header, resp = resp.split(__MSG_FIELD_SEP, 1)
     if header != __RSP_OK:
         LOG.error("Something went wrong with registering the user")
