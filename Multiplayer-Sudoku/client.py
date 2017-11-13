@@ -132,6 +132,7 @@ def req_join_game(player_id, game_id, server_port):
     sock.send(__REQ_ADD_PLAYER_TO_GAMEROOM + __MSG_FIELD_SEP + player_id + __MSG_FIELD_SEP + game_id)
     resp = sock.recv(1024)
     header, resp = resp.split(__MSG_FIELD_SEP, 1)
+
     if header == __RSP_OK:
         state = pickle.loads(resp)
         sock.shutdown(SHUT_WR)

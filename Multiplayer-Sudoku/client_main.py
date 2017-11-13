@@ -4,21 +4,21 @@ from client import *
 import time
 import threading
 import sys
+import SudokuGameGUI
 
 # Setup logging
 FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
 
-lobby_update_thread = None
+sudoku_refresh_thread = None
+lobby_refresh_thread = None
 lobby_data = None
 
 
-def updatelob(root, port, room_window):
+def refresh_lobby(root, port, room_window):
     global lobby_data
     games = req_get_games(port)
-    # (room_id, num players, max players)
-    games = [(1, 3, 4), (2, 1, 5), (3, 3, 3)]
     update_lobby(root, games)
 
     lobby_data = room_window.action
@@ -28,7 +28,16 @@ def updatelob(root, port, room_window):
         destroy_lobby_window(root)
     else:
         time.sleep(0.1)
-        updatelob(root, port, room_window)
+        refresh_lobby(root, port, room_window)
+
+
+def refresh_game(sudoku_ui, game_id, port, root):
+    game_state = req_get_state(game_id, port)
+    board, scores, game_progression = game_state
+    sudoku_ui.update_board(root, board)
+
+    time.sleep(0.2)
+    refresh_game(sudoku_ui, game_id, port, root)
 
 
 if __name__ == "__main__":
@@ -40,8 +49,8 @@ if __name__ == "__main__":
 
     room_window = initiate_lobby(root)
 
-    lobby_update_thread = threading.Thread(target=updatelob(root, port, room_window))
-    lobby_update_thread.start()
+    lobby_refresh_thread = threading.Thread(target=refresh_lobby(root, port, room_window))
+    lobby_refresh_thread.start()
 
     LOG.debug("Final lobby data is " + str(lobby_data))
 
@@ -49,15 +58,31 @@ if __name__ == "__main__":
         LOG.error("Could not fetch data about game creation/selection")
         sys.exit(1)
 
-    LOG.debug("Doing create game or join game request")
     action, value = lobby_data
     game_state = None
 
     if action == "create":
         LOG.debug("Creating new game by request of user")
         game_id, game_state = req_create_game(user_id, value, port)
-    elif action == "join":
+    elif action == "select":
         game_id = value
         game_state = req_join_game(user_id, game_id, port)
 
     LOG.debug("The game state is " + str(game_state))
+
+    # TODO: Create game board
+    # First unpack game state into board, scores, game progression indicator
+    board, scores, game_progression = game_state[0], game_state[1], game_state[2]
+
+    LOG.debug("Board is " + str(board))
+    LOG.debug("Scores are " + str(scores))
+    LOG.debug("Game state is " + str(game_progression))
+
+    game = SudokuGameGUI.SudokuBoard(board)
+
+    LOG.debug(game.board)
+
+    sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
+    root.geometry("%dx%d" % (SudokuGameGUI.WIDTH, SudokuGameGUI.HEIGHT))
+
+    sudoku_refresh_thread = threading.Thread(target=refresh_game(sudoku_ui, game_id, port, root))
