@@ -58,7 +58,7 @@ def parse_msg(msg):
         print("Making a move", msg)
         player_id, game_id, x_coord, y_coord, val = msg.split(__MSG_FIELD_SEP, 4)
         game = __GAMES.get_game(game_id)
-        game.make_move(player_id, x_coord, y_coord, val)
+        game.make_move(player_id, int(x_coord), int(y_coord), int(val))
         state = pickle.dumps(game.get_state(__PLAYERS))
         client_socket.send(__RSP_OK + __MSG_FIELD_SEP + state)
 

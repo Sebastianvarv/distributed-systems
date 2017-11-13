@@ -34,6 +34,7 @@ class Game:
 
     def make_move(self, user_id, x, y, value):
         if self.valid_move(x, y, value):
+            self.board[x][y] = value
             self.scores[user_id] += 1
             self.check_game_won()
             return True
