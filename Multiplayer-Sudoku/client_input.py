@@ -39,10 +39,9 @@ class ConnectionUI(Frame):
         self.entry_nickname = Entry(self)
         self.entry_nickname.grid(row=1, column=1)
 
-        self.submit_name = Button(self,
-                                  text="Submit and connect",
-                                  command=self.__submit_connect)
+        self.submit_name = Button(self, text="Submit and connect", command=self.__submit_connect)
         self.submit_name.grid(row=2, column=1)
+
 
     def __submit_connect(self):
         """
@@ -56,9 +55,10 @@ class ConnectionUI(Frame):
         if 8 >= len(nickname) > 0:
             if ' ' not in nickname:
                 name_ok = True
-                print "Name correct: " + nickname
+                print "Player created: " + nickname
         else:
-            print "Bad name."
+            # replace with warning window.
+            print "Bad name input."
 
         try:
             port = int(self.entry_port.get())
@@ -70,6 +70,7 @@ class ConnectionUI(Frame):
                 port_ok = True
                 print "Ok port."
         else:
+            # replace with warning window.
             print "Bad port"
 
         if name_ok and port_ok:
@@ -78,6 +79,8 @@ class ConnectionUI(Frame):
 
 
 class LobbyUI(Frame):
+    selection = None
+
     def __init__(self, parent):
         Frame.__init__(self, parent)
         self.parent = parent
@@ -88,42 +91,46 @@ class LobbyUI(Frame):
         self.parent.title("Sudoku Lobby")
         self.pack(fill=BOTH, expand=1)
 
-        Label(self, text="Game room").grid(row=0)
+        Label(self, text="Game lobby").grid(row=0)
 
-        self.lobby_list = Treeview(self)
-        self.lobby_list["columns"] = ("Game room", "Players")
-        self.lobby_list.column("Game room", width=100)
+        self.lobby_list = Treeview(self, columns=('Room ID', 'Players'))
+        self.lobby_list.column("Room ID", width=100)
         self.lobby_list.column("Players", width=100)
         self.lobby_list.grid(row=1, column=0)
 
-        self.connect_lobby = Button(self,
-                                    text="Submit and connect",
-                                    command=self.__connect_lobby)
+        self.connect_lobby = Button(self, text="Connect", command=self.__connect_lobby)
         self.connect_lobby.grid(row=2, column=1)
 
-    def __connect_lobby(self):
-        selection = self.get_current_selection()
-        print "daddy wants to play"
-        print selection
-        # do something related to destroying the window and returning selected lobby data.
 
-    def get_current_selection(self):
+    def __connect_lobby(self):
+        print "Lobby connect button has been pressed."
         current_item = self.lobby_list.focus()
-        return current_item
+        print current_item
+        #list_selection = self.__get_current_selection()
+        # do something related to destroying the window and returning selected lobby data.
+        #self.selection = list_selection
+
 
     def populate_list(self, games):
+        """
+        Method to re-populate the lobby list every poll.
+        :param games:
+        """
+        self.lobby_list.delete(*self.lobby_list.get_children())
+
         for game in games:
-            print game
-            #self.lobby_list.insert("", 0, text="Line 1", values=("1A", "1b"))
+            self.lobby_list.insert('', 'end', values=("Game " + str(game[0]), str(game[1]) + "/" + str(game[2])))
+        print "Lobby list updated."
 
 
 def input_main(root):
     client_window = ConnectionUI(root)
-    root.geometry("%dx%d" % (INPUT_WIDTH, INPUT_HEIGHT + 40))
+    root.geometry("%dx%d" % (INPUT_WIDTH, INPUT_HEIGHT))
     while True:
         root.update()
+        root.after(100)
         if client_window.port is not None and client_window.nickname is not None:
-            print "input is fucking dead get the fuck out of here shit!"
+            print "Closing input window."
             client_window.destroy()
             return client_window.port, client_window.nickname
 
@@ -132,19 +139,19 @@ def initiate_lobby(root):
     room_window = LobbyUI(root)
     root.geometry("%dx%d" % (LOBBY_WIDTH, LOBBY_HEIGHT))
     print "Kick up the 4d3d3d3."
+    return room_window
 
 
 def update_lobby(root, games):
     lobby_instance = root.winfo_children()[0]
-
     lobby_instance.populate_list(games)
     root.update()
     # don't print this when polling is active pls
-    print "Lobby updated."
+    print "Lobby window updated."
 
 
 def destroy_lobby_window(root):
     lobby_instance = root.winfo_children()[0]
 
-    print "lobby is fucking dead get the fuck out of here shit!"
+    print "Lobby is destroyed."
     lobby_instance.destroy()
