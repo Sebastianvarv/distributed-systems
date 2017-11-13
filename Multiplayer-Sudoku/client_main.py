@@ -3,6 +3,7 @@ from client_input import input_main, initiate_lobby, update_lobby, destroy_lobby
 from client import *
 import time
 import threading
+import sys
 
 # Setup logging
 FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
@@ -42,7 +43,21 @@ if __name__ == "__main__":
     lobby_update_thread = threading.Thread(target=updatelob(root, port, room_window))
     lobby_update_thread.start()
 
-    LOG.debug("Final lobby data is" + str(lobby_data))
+    LOG.debug("Final lobby data is " + str(lobby_data))
 
-    # TODO: Do the request based on the information, i.e. create game or join game
+    if lobby_data is None:
+        LOG.error("Could not fetch data about game creation/selection")
+        sys.exit(1)
+
     LOG.debug("Doing create game or join game request")
+    action, value = lobby_data
+    game_state = None
+
+    if action == "create":
+        LOG.debug("Creating new game by request of user")
+        game_id, game_state = req_create_game(user_id, value, port)
+    elif action == "join":
+        game_id = value
+        game_state = req_join_game(user_id, game_id, port)
+
+    LOG.debug("The game state is " + str(game_state))
