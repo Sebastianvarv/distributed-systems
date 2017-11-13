@@ -1,5 +1,6 @@
 
 import uuid
+from common import __GAME_STATE_WAIT, __GAME_STATE_PLAY, __GAME_STATE_OVER
 
 def read_solution():
     f = open("solutions.txt", "r")
@@ -30,11 +31,12 @@ class Game:
         self.solution, self.board = read_solution()
         self.scores = {}
         self.max_players = max_players
-        self.game_started = False
+        self.game_state = __GAME_STATE_WAIT
 
     def make_move(self, user_id, x, y, value):
         if self.valid_move(x, y, value):
             self.scores[user_id] += 1
+            self.check_game_won()
             return True
         self.scores[user_id] -= 1
         return False
@@ -45,18 +47,20 @@ class Game:
         return False
             
     def check_game_won(self):
+        game_won = True
         for i in range(9):
             for j in range(9):
                 if self.board[i][j] != self.solution[i][j]:
-                    return False
-        return True
+                    game_won = False
+        if game_won:
+            self.game_state = __GAME_STATE_OVER
 
     # Add new player if possible - returns True if added, False if not
     def add_player(self, player_id):
         if len(self.scores) < self.max_players:
             self.scores[player_id] = 0
             if len(self.scores) == self.max_players:
-                self.game_started = True
+                self.game_state == __GAME_STATE_PLAY
             return True
         return False
 
@@ -71,4 +75,4 @@ class Game:
         for uid, score in self.scores.items():
             name = players.get_player_name(uid)
             names_scores.append((name, score))
-        return [self.board, names_scores]
+        return [self.board, names_scores, self.game_state]
