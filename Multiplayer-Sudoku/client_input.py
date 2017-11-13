@@ -16,11 +16,6 @@ INPUT_HEIGHT = 80
 LOBBY_WIDTH = 350
 LOBBY_HEIGHT = 400
 
-# Sudoku sizes
-MARGIN = 20  # Pixels around the board
-SIDE = 50  # Width of every board cell.
-SUDOKU_WIDTH = SUDOKU_HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
-
 class ConnectionUI(Frame):
     nickname = None
     port = None
@@ -138,19 +133,19 @@ class LobbyUI(Frame):
         max_ok = False
 
         try:
-            max_p = int(self.max_players.get())
+            max_count = int(self.max_players.get())
         except (ValueError, TypeError):
-            max_p = -1
+            max_count = -1
 
-        if isinstance(max_p, int):
-            if max_p >= 2:
+        if isinstance(max_count, int):
+            if max_count >= 2:
                 max_ok = True
                 LOG.debug('Ok max player count.')
         else:
             LOG.error('Bad max count.')
 
         if max_ok:
-            self.action = ('create', max_ok)
+            self.action = ('create', max_count)
 
 
     def populate_list(self, games):
