@@ -79,7 +79,7 @@ class ConnectionUI(Frame):
 
 
 class LobbyUI(Frame):
-    selection = None
+    action = None
 
     def __init__(self, parent):
         Frame.__init__(self, parent)
@@ -96,19 +96,49 @@ class LobbyUI(Frame):
         self.lobby_list = Treeview(self, columns=('Room ID', 'Players'))
         self.lobby_list.column("Room ID", width=100)
         self.lobby_list.column("Players", width=100)
-        self.lobby_list.grid(row=1, column=0)
+        self.lobby_list.grid(row=1, column=1)
 
         self.connect_lobby = Button(self, text="Connect", command=self.__connect_lobby)
-        self.connect_lobby.grid(row=2, column=1)
+        self.connect_lobby.grid(row=1, column=2)
 
+        Label(self, text="Enter max players.").grid(row=3, column=0)
+
+        self.max_players = Entry(self)
+        self.max_players.grid(row=3, column=1)
+
+        self.create_game = Button(self, text="Create new game", command=self.__create_game)
+        self.create_game.grid(row=3, column=2)
 
     def __connect_lobby(self):
         print "Lobby connect button has been pressed."
         current_item = self.lobby_list.focus()
         print current_item
+        if current_item is not None:
+            # selection = (room_id, )
+            self.action = ('select', current_item[0])
+
         #list_selection = self.__get_current_selection()
         # do something related to destroying the window and returning selected lobby data.
         #self.selection = list_selection
+
+
+    def __create_game(self):
+        max_ok = False
+
+        try:
+            max_p = int(self.max_players.get())
+        except (ValueError, TypeError):
+            max_p = "-1"
+
+        if isinstance(max_p, int):
+            if max_p >= 2:
+                max_ok = True
+                print "Ok max player count."
+        else:
+            print "Bad max count."
+
+        if max_ok:
+            self.action = ('create', max_ok)
 
 
     def populate_list(self, games):
@@ -120,7 +150,6 @@ class LobbyUI(Frame):
 
         for game in games:
             self.lobby_list.insert('', 'end', values=("Game " + str(game[0]), str(game[1]) + "/" + str(game[2])))
-        print "Lobby list updated."
 
 
 def input_main(root):
@@ -128,7 +157,6 @@ def input_main(root):
     root.geometry("%dx%d" % (INPUT_WIDTH, INPUT_HEIGHT))
     while True:
         root.update()
-        root.after(100)
         if client_window.port is not None and client_window.nickname is not None:
             print "Closing input window."
             client_window.destroy()
@@ -143,11 +171,15 @@ def initiate_lobby(root):
 
 
 def update_lobby(root, games):
+    """
+    Update lobby list view.
+    :param root:
+    :param games:
+    """
+
     lobby_instance = root.winfo_children()[0]
     lobby_instance.populate_list(games)
     root.update()
-    # don't print this when polling is active pls
-    print "Lobby window updated."
 
 
 def destroy_lobby_window(root):
