@@ -1,7 +1,12 @@
 from Tkinter import Frame, Button, BOTH, Entry, Label, CENTER
 from ttk import Treeview
 from ufopornoo import SudokuUI, SudokuGame
-import time
+import logging
+
+# Setup logging
+FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+LOG = logging.getLogger()
 
 # Input sizes
 INPUT_WIDTH = 300
@@ -30,8 +35,8 @@ class ConnectionUI(Frame):
         self.parent.title('Server connection')
         self.pack(fill=BOTH, expand=1)
 
-        Label(self, text='Insert port').grid(row=0)
-        Label(self, text='Insert name').grid(row=1)
+        Label(self, text='Insert port').grid(row=0, padx=(35, 0))
+        Label(self, text='Insert name').grid(row=1, padx=(35, 0))
 
         self.entry_port = Entry(self)
         self.entry_port.grid(row=0, column=1)
@@ -55,10 +60,10 @@ class ConnectionUI(Frame):
         if 8 >= len(nickname) > 0:
             if ' ' not in nickname:
                 name_ok = True
-                print 'Player created: ' + nickname
+                LOG.debug('Player created: ' + nickname)
         else:
             # replace with warning window.
-            print 'Bad name input.'
+            LOG.error('Bad name input.')
 
         try:
             port = int(self.entry_port.get())
@@ -68,10 +73,10 @@ class ConnectionUI(Frame):
         if isinstance(port, int):
             if 1000 < port < 65535:
                 port_ok = True
-                print 'Ok port.'
+                LOG.debug('Ok port.')
         else:
             # replace with warning window.
-            print 'Bad port'
+            LOG.error('Bad port')
 
         if name_ok and port_ok:
             self.nickname = nickname
@@ -111,7 +116,9 @@ class LobbyUI(Frame):
         self.create_game.grid(row=5, column=1)
 
     def __connect_lobby(self):
-        print 'Lobby connect button has been pressed.'
+        """
+        Handle lobby connection button."""
+        LOG.debug('Lobby connect button has been pressed.')
         current_item = self.lobby_list.focus()
         print current_item
         if current_item is not None:
@@ -124,6 +131,8 @@ class LobbyUI(Frame):
 
 
     def __create_game(self):
+        """
+        Create game with some number of max players."""
         max_ok = False
 
         try:
@@ -134,9 +143,9 @@ class LobbyUI(Frame):
         if isinstance(max_p, int):
             if max_p >= 2:
                 max_ok = True
-                print 'Ok max player count.'
+                LOG.debug('Ok max player count.')
         else:
-            print 'Bad max count.'
+            LOG.error('Bad max count.')
 
         if max_ok:
             self.action = ('create', max_ok)
@@ -145,6 +154,7 @@ class LobbyUI(Frame):
     def populate_list(self, games):
         """
         Method to re-populate the lobby list every poll.
+        Additionally retains the focused line during polling.
         :param games:
         """
         previous_selection = self.lobby_list.selection()
@@ -164,26 +174,36 @@ class LobbyUI(Frame):
 
 
 def input_main(root):
+    """
+    Create input UI and attach it to root.
+    Keep polling until appropriate input is receiver and return it.
+    :param root:
+    :return port, nickname:
+    """
     client_window = ConnectionUI(root)
     root.geometry('%dx%d' % (INPUT_WIDTH, INPUT_HEIGHT))
     while True:
         root.update()
         if client_window.port is not None and client_window.nickname is not None:
-            print 'Closing input window.'
+            LOG.debug('Closing input window.')
             client_window.destroy()
             return client_window.port, client_window.nickname
 
 
 def initiate_lobby(root):
+    """
+    Create lobby UI and attach it to root.
+    :param root:
+    """
     room_window = LobbyUI(root)
     root.geometry('%dx%d' % (LOBBY_WIDTH, LOBBY_HEIGHT))
-    print 'Kick up the 4d3d3d3.'
+    LOG.debug('Kick up the 4d3d3d3.')
     return room_window
 
 
 def update_lobby(root, games):
     """
-    Update lobby list view.
+    Update lobby list view from games list data.
     :param root:
     :param games:
     """
@@ -194,7 +214,10 @@ def update_lobby(root, games):
 
 
 def destroy_lobby_window(root):
+    """
+    Close lobby UI portion of root.
+    :param root:
+    """
     lobby_instance = root.winfo_children()[0]
-
-    print 'Lobby is destroyed.'
+    LOG.debug('Lobby is destroyed.')
     lobby_instance.destroy()
