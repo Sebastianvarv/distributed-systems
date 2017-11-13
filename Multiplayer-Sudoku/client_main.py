@@ -33,8 +33,7 @@ def refresh_lobby(root, port, room_window):
 
 def refresh_game_state(game_state):
     board, scores, game_progression = game_state
-    board_changed = sudoku_ui.update_board(root, board)
-    LOG.debug("sudoku game updating gave back " + str(board_changed))
+    board_changed = sudoku_ui.update_board(root, board, game_progression)
 
     return board_changed
 
@@ -47,7 +46,7 @@ def refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed=None):
 
     board_changed = refresh_game_state(game_state)
 
-    time.sleep(1)
+    time.sleep(0.2)
     refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed)
 
 
@@ -81,11 +80,9 @@ if __name__ == "__main__":
 
     LOG.debug("The game state is " + str(game_state))
 
-    # TODO: Create game board
     # First unpack game state into board, scores, game progression indicator
     board, scores, game_progression = game_state[0], game_state[1], game_state[2]
 
-    LOG.debug("Board is " + str(board))
     LOG.debug("Scores are " + str(scores))
     LOG.debug("Game state is " + str(game_progression))
 

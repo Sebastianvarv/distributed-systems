@@ -16,6 +16,8 @@ class SudokuUI(Frame):
         self.new_entry = None
         self.previous_guess = None
 
+        self.game_state = 0
+
         self.__initUI()
 
     def __initUI(self):
@@ -98,7 +100,16 @@ class SudokuUI(Frame):
             self.__draw_puzzle()
             self.__draw_cursor()
 
-    def update_board(self, root, board):
+    def update_board(self, root, board, new_game_state):
+        return_val = None
+
+        # Check for game state, if it is "0", just return, else continue the game
+        if self.game_state == 0:
+            root.update()
+
+            if new_game_state != 0:
+                self.game_state = new_game_state
+            return return_val
 
         # If previous guess was not correct flash it red
         if self.previous_guess is not None and board[self.previous_guess[0]][self.previous_guess[1]] != \
@@ -113,7 +124,6 @@ class SudokuUI(Frame):
             self.canvas.delete("fail")
 
         # Initiate return value to none, update the board and draw it
-        return_val = None
         self.game.update_board(board)
         self.__draw_puzzle()
         root.update()
