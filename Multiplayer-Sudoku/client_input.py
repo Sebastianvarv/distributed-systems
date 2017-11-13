@@ -119,8 +119,7 @@ class LobbyUI(Frame):
 
         if current_item is not None:
             # Select game column value from item values dictionary.
-            selected_game = self.lobby_list.item(current_item)['values'][0]
-            selected_id = selected_game.split(' ')[1]
+            selected_id = self.lobby_list.item(current_item)['values'][0]
 
             if selected_id is not None:
                 LOG.debug('Player wishes to join game ' + str(selected_id))
@@ -161,7 +160,7 @@ class LobbyUI(Frame):
 
         self.lobby_list.delete(*self.lobby_list.get_children())
         for game in games:
-            self.lobby_list.insert('', 'end', values=('Game ' + str(game[0]), str(game[1]) + '/' + str(game[2])))
+            self.lobby_list.insert('', 'end', values=(str(game[0]), str(game[1]) + '/' + str(game[2])))
 
         if prev_item is not None:
             for item in self.lobby_list.get_children():
