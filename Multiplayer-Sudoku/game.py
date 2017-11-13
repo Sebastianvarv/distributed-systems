@@ -19,7 +19,6 @@ def read_solution():
         split_row = row.split(" ")
         for j in range(9):
             board[i][j] = int (split_row[j])
-
     f.close()
 
     return solution, board
