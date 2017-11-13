@@ -47,3 +47,8 @@ __ERR_MSGS = {__RSP_OK: 'No Error',
 # Field separator for sending multiple values ---------------------------------
 __MSG_FIELD_SEP = ':'
 __MSG_END = '__END'
+
+# Game states
+__GAME_STATE_WAIT = '0'     # Game has been created - waiting until room is full
+__GAME_STATE_PLAY = '1'     # Game is currently being played
+__GAME_STATE_OVER = '2'     # Game is over
