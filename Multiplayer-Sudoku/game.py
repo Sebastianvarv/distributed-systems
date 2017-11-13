@@ -31,7 +31,7 @@ class Game:
         self.solution, self.board = read_solution()
         self.scores = {}
         self.max_players = max_players
-        self.game_state = __GAME_STATE_WAIT
+        self.game_state = 0
 
     def make_move(self, user_id, x, y, value):
         if self.valid_move(x, y, value):
@@ -53,14 +53,14 @@ class Game:
                 if self.board[i][j] != self.solution[i][j]:
                     game_won = False
         if game_won:
-            self.game_state = __GAME_STATE_OVER
+            self.game_state = 2
 
     # Add new player if possible - returns True if added, False if not
     def add_player(self, player_id):
         if len(self.scores) < self.max_players:
             self.scores[player_id] = 0
             if len(self.scores) == self.max_players:
-                self.game_state == __GAME_STATE_PLAY
+                self.game_state = 1
             return True
         return False
 
