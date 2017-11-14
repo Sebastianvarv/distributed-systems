@@ -195,6 +195,10 @@ def main_sudoku(root, lobby_data):
         game_id = value
         game_state = req_join_game(user_id, game_id, port)
 
+    if not game_state:
+        tkMessageBox.showwarning("Game error", "The selected room is full.")
+        return
+
     LOG.debug("The game state is " + str(game_state))
 
     # First unpack game state into board, scores, game progression indicator

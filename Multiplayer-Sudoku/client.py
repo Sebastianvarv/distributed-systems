@@ -140,14 +140,17 @@ def req_join_game(player_id, game_id, server_port):
         sock.close()
         return state
     elif header == __RSP_GAME_FULL_ERROR:
-        # TODO: handle game room full error (show alert)
         LOG.info("The chosen game room is full!")
+        sock.shutdown(SHUT_WR)
+        sock.close()
+        return False
     else:
         # TODO: handle more general connection etc error
         LOG.error("Something went wrong while trying to join the game room")
 
     sock.shutdown(SHUT_WR)
     sock.close()
+    return False
 
 
 def req_get_state(game_id, server_port):
