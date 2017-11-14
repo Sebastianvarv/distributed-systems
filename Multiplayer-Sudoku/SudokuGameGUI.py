@@ -8,7 +8,7 @@ WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
 class SudokuUI(Frame):
     """
     Sudoku grid UI class.
-
+    Adapted from: http://newcoder.io/gui/part-4/
     """
 
     def __init__(self, parent, board):
@@ -171,7 +171,9 @@ class SudokuUI(Frame):
 
 class SudokuBoard(object):
     """
-    Sudoku Board representation"""
+    Sudoku Board representation
+    Adapted from: http://newcoder.io/gui/part-4/
+    """
 
     def __init__(self, board):
         self.board = self.__create_board(board)
