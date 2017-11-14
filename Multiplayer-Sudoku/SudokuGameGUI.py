@@ -113,7 +113,7 @@ class SudokuUI(Frame):
             y1 = MARGIN + (self.row + 1) * SIDE - 1
             self.canvas.create_rectangle(
                 x0, y0, x1, y1,
-                outline="red", tags="cursor"
+                outline="green", tags="cursor"
             )
 
     def __key_pressed(self, event):
