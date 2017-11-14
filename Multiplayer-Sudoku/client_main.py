@@ -1,9 +1,9 @@
 from Tkinter import Tk
+import tkMessageBox
 from client_input import input_main, initiate_lobby, update_lobby, destroy_lobby_window
 from client import *
 import time
 import threading
-import sys
 import SudokuGameGUI
 
 # Setup logging
@@ -14,6 +14,7 @@ LOG = logging.getLogger()
 sudoku_refresh_thread = None
 lobby_refresh_thread = None
 lobby_data = None
+hard_exit = False
 
 
 def refresh_lobby(root, port, room_window):
@@ -33,9 +34,14 @@ def refresh_lobby(root, port, room_window):
 
 
 def refresh_lobby_loopy(root, port, room_window):
+    global hard_exit
     keep_refreshing = True
 
     while keep_refreshing:
+        if hard_exit:
+            room_window.destroy()
+            break
+
         keep_refreshing = refresh_lobby(root, port, room_window)
 
 
@@ -64,16 +70,17 @@ def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
 
 
 def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
+    global hard_exit
     board_changed = None
     keep_playing = True
 
     while keep_playing:
-        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
+        if hard_exit:
+            sudoku_ui.destroy()
+            hard_exit = False
+            break
 
-    if not keep_playing:
-        pass
-        # perhaps summon the lobby back from here?
-        # or return something to kick up the lobby in an external loop
+        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
 
 
 def main_lobby(root, port):
@@ -87,10 +94,6 @@ def main_lobby(root, port):
     LOG.debug("Final lobby data is " + str(lobby_data))
 
     return lobby_data
-
-    #if lobby_data is None:
-    #    LOG.error("Could not fetch data about game creation/selection")
-    #    sys.exit(1)
 
 
 def main_sudoku(root, lobby_data):
@@ -119,8 +122,16 @@ def main_sudoku(root, lobby_data):
     sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, user_id))
 
 
+def on_close():
+    global hard_exit
+    if tkMessageBox.askokcancel("Quit", "Do you want to quit?"):
+        hard_exit = True
+
+
 if __name__ == "__main__":
     root = Tk()
+    root.protocol("WM_DELETE_WINDOW", on_close)
+
     port, nickname = input_main(root)
     LOG.debug("Port: %d, nickname: %s" % (port, nickname))
     user_id = reg_user(nickname, port)
@@ -129,8 +140,14 @@ if __name__ == "__main__":
     while active_client:
         lobby_data = main_lobby(root, port)
 
+        # If we exited lobby permanently then break.
+        if hard_exit:
+            break
+
+        # If lobby returned odd stuff, then start again.
         if lobby_data is None:
             continue
 
+        # If we got here, then we're ready to play.
         main_sudoku(root, lobby_data)
 
