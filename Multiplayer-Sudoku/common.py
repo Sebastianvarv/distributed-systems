@@ -19,6 +19,8 @@ __REQ_INIT_GAME = '7'
 __REQ_GET_STATE = '8'
 # Remove player
 __REQ_REMOVE_PLAYER = '9'
+# Remove player from lobby and players list
+__REQ_REMOVE_PLAYER_LOBBY = '10'
 
 __CTR_MSGS = {__REQ_REG_USER: 'Register user with nickname',
               __REQ_CONNECT_SERVER_PORT: 'Connect game server port',
@@ -29,7 +31,8 @@ __CTR_MSGS = {__REQ_REG_USER: 'Register user with nickname',
               __REQ_INIT_GAME: 'Return current game state with board and scores',
               __REQ_GAME_STARTED: 'Game has started',
               __REQ_GET_STATE: 'Get current game state',
-              __REQ_REMOVE_PLAYER: 'Remove player from the game'
+              __REQ_REMOVE_PLAYER: 'Remove player from the game',
+              __REQ_REMOVE_PLAYER_LOBBY: 'Remove player from the lobby'
               }
 # Responses--------------------------------------------------------------------
 __RSP_OK = '0'

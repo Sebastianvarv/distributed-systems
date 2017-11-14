@@ -4,7 +4,7 @@ from socket import socket, AF_INET, SOCK_STREAM, SHUT_WR
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_CREATE_GAME, __REQ_ADD_PLAYER_TO_GAMEROOM, __REQ_MAKE_MOVE, \
     __REQ_INIT_GAME, __MSG_END, __RSP_OK, __REQ_CONNECT_SERVER_PORT, __RSP_GAME_FULL_ERROR, __REQ_GET_STATE, \
-    __REQ_REMOVE_PLAYER
+    __REQ_REMOVE_PLAYER, __REQ_REMOVE_PLAYER_LOBBY
 import logging
 
 # Setup logging
@@ -178,6 +178,21 @@ def req_remove_player(game_id, player_id, server_port):
     """
     sock = connect_server(server_port)
     sock.send(__REQ_REMOVE_PLAYER + __MSG_FIELD_SEP + game_id + __MSG_FIELD_SEP + player_id)
+    resp = sock.recv(1024)
+    header, resp = resp.split(__MSG_FIELD_SEP, 1)
+    if header == __RSP_OK:
+        return
+
+
+def req_remove_player_lobby(player_id, server_port):
+    """
+    Removes player from the lobby and overall players list.
+    :param player_id: player id
+    :param server_port: port to connect
+    :return: None
+    """
+    sock = connect_server(server_port)
+    sock.send(__REQ_REMOVE_PLAYER_LOBBY + __MSG_FIELD_SEP + player_id)
     resp = sock.recv(1024)
     header, resp = resp.split(__MSG_FIELD_SEP, 1)
     if header == __RSP_OK:
