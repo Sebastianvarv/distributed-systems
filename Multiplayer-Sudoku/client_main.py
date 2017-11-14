@@ -41,14 +41,18 @@ def refresh_lobby_loopy(root, port, room_window):
 
 def refresh_game_state(game_state):
     board, scores, game_progression = game_state
+    keep_playing = True
+    print "I am game progression: " + str(game_progression)
+
     board_changed = sudoku_ui.update_board(root, board, game_progression)
 
     if game_progression == 2:
         # TODO: If game is finished use a different handler perhaps?
         pass
         # Return something different than the usual board_changed shit that can be used to break the game loop.
+        keep_playing = False
 
-    return board_changed
+    return board_changed, keep_playing
 
 
 def refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed=None):
@@ -57,17 +61,18 @@ def refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed=None):
     else:
         game_state = req_get_state(game_id, port)
 
-    board_changed = refresh_game_state(game_state)
+    board_changed, keep_playing = refresh_game_state(game_state)
 
     time.sleep(0.2)
-    return board_changed
+    return board_changed, keep_playing
 
 
 def refresh_game_loopy(sudoku_ui, game_id, port, root, user_id):
     board_changed = None
+    keep_playing = True
 
-    while True:
-        board_changed = refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed)
+    while keep_playing:
+        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed)
         # Something needs to come out of refresh game to kick up the 4d3d3d3 and break the cycle
 
 
