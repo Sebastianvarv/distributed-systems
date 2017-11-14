@@ -41,7 +41,6 @@ def refresh_lobby(root, port, room_window):
     lobby_data = room_window.action
 
     if lobby_data is not None:
-        LOG.debug("Lobby updating returned: " + str(lobby_data))
         destroy_lobby_window(room_window)
         return False
     else:
@@ -160,7 +159,7 @@ def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
 
 def main_input(root):
     """
-    Keep polling input window until appropriate input is receiver and return it.
+    Keep refreshing input window until appropriate input is receiver and return it.
     :param root:
     :return port, nickname:
     """
