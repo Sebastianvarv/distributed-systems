@@ -39,49 +39,45 @@ def refresh_lobby_loopy(root, port, room_window):
         keep_refreshing = refresh_lobby(root, port, room_window)
 
 
-def refresh_game_state(game_state):
+def refresh_game_state(sudoku_ui, game_state):
     board, scores, game_progression = game_state
     keep_playing = True
-    print "I am game progression: " + str(game_progression)
 
     board_changed = sudoku_ui.update_board(root, board, game_progression)
 
     if game_progression == 2:
-        # TODO: If game is finished use a different handler perhaps?
-        pass
-        # Return something different than the usual board_changed shit that can be used to break the game loop.
         keep_playing = False
 
     return board_changed, keep_playing
 
 
-def refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed=None):
+def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
     if board_changed is not None:
         game_state = req_make_move(user_id, game_id, board_changed[0], board_changed[1], board_changed[2], port)
     else:
         game_state = req_get_state(game_id, port)
 
-    board_changed, keep_playing = refresh_game_state(game_state)
+    board_changed, keep_playing = refresh_game_state(sudoku_ui, game_state)
 
     time.sleep(0.2)
     return board_changed, keep_playing
 
 
-def refresh_game_loopy(sudoku_ui, game_id, port, root, user_id):
+def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
     board_changed = None
     keep_playing = True
 
     while keep_playing:
-        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed)
-        # Something needs to come out of refresh game to kick up the 4d3d3d3 and break the cycle
+        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
+
+    if not keep_playing:
+        pass
+        # perhaps summon the lobby back from here?
+        # or return something to kick up the lobby in an external loop
 
 
-if __name__ == "__main__":
-    root = Tk()
-    port, nickname = input_main(root)
-    LOG.debug("Port: %d, nickname: %s" % (port, nickname))
-
-    user_id = reg_user(nickname, port)
+def main_lobby(root, port):
+    global lobby_data
 
     room_window = initiate_lobby(root)
 
@@ -90,10 +86,14 @@ if __name__ == "__main__":
 
     LOG.debug("Final lobby data is " + str(lobby_data))
 
-    if lobby_data is None:
-        LOG.error("Could not fetch data about game creation/selection")
-        sys.exit(1)
+    return lobby_data
 
+    #if lobby_data is None:
+    #    LOG.error("Could not fetch data about game creation/selection")
+    #    sys.exit(1)
+
+
+def main_sudoku(root, lobby_data):
     action, value = lobby_data
     game_state = None
 
@@ -113,10 +113,24 @@ if __name__ == "__main__":
     LOG.debug("Game state is " + str(game_progression))
 
     game = SudokuGameGUI.SudokuBoard(board)
-
-    LOG.debug(game.board)
-
     sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
     root.geometry("%dx%d" % (SudokuGameGUI.WIDTH, SudokuGameGUI.HEIGHT))
 
-    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, root, user_id))
+    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, user_id))
+
+
+if __name__ == "__main__":
+    root = Tk()
+    port, nickname = input_main(root)
+    LOG.debug("Port: %d, nickname: %s" % (port, nickname))
+    user_id = reg_user(nickname, port)
+    active_client = True
+
+    while active_client:
+        lobby_data = main_lobby(root, port)
+
+        if lobby_data is None:
+            continue
+
+        main_sudoku(root, lobby_data)
+
