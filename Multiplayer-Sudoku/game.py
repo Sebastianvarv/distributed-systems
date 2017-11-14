@@ -118,6 +118,6 @@ class Game:
         names_scores = []
         for uid, score in self.scores.items():
             name = players.get_player_name(uid)
-            names_scores.append((name, score))
+            names_scores.append((name, score, uid))
         names_scores = sorted(names_scores, key=lambda x: x[1])
         return [self.board, names_scores, self.game_state]
