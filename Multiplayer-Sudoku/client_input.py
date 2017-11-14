@@ -9,6 +9,7 @@ import logging
 FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
+LOG.setLevel(logging.INFO)
 
 # Input sizes
 INPUT_WIDTH = 300

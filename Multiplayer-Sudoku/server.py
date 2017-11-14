@@ -11,7 +11,11 @@ from players import Players
 
 __PLAYERS = Players()
 __GAMES = Games()
+
+FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
+LOG.setLevel(logging.INFO)
 
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_CREATE_GAME, __REQ_ADD_PLAYER_TO_GAMEROOM, __REQ_MAKE_MOVE, \

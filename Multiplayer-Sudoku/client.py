@@ -1,5 +1,4 @@
 import pickle
-from argparse import ArgumentParser
 from socket import socket, AF_INET, SOCK_STREAM, SHUT_WR
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_CREATE_GAME, __REQ_ADD_PLAYER_TO_GAMEROOM, __REQ_MAKE_MOVE, \
@@ -11,6 +10,7 @@ import logging
 FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
+LOG.setLevel(logging.INFO)
 
 __USER_ID = None
 __CURRENT_GAME_ID = None

@@ -10,6 +10,7 @@ import SudokuGameGUI
 FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
+LOG.setLevel(logging.INFO)
 
 sudoku_refresh_thread = None
 lobby_refresh_thread = None
