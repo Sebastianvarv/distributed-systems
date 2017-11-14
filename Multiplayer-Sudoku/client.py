@@ -38,7 +38,8 @@ def reg_user(username, server_port):
     """
     global __USER_ID
     sock = connect_server(server_port)
-    sock.send(__REQ_REG_USER + __MSG_FIELD_SEP + username)
+
+    sock.send(__REQ_REG_USER + __MSG_FIELD_SEP + username.encode("utf-8"))
     resp = sock.recv(1024)
 
     LOG.debug("Response is " + str(resp))
