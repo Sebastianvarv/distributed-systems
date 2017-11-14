@@ -185,8 +185,7 @@ class LobbyUI(Frame):
 
     def populate_list(self, games):
         """
-        Method to re-populate the lobby list every poll.
-        Additionally retains the focused line during polling.
+        Method to re-populate the lobby list every update.
         :param games:
         """
         previous_selection = self.lobby_list.selection()
