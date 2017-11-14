@@ -18,6 +18,11 @@ LOBBY_WIDTH = 400
 LOBBY_HEIGHT = 400
 
 class ConnectionUI(Frame):
+    """
+    Initial name and port dialogue UI.
+    In case of incorrect inputs, the user is notified via error messages and is allowed to continue
+    providing inputs.
+    """
     nickname = None
     port = None
 
@@ -28,6 +33,9 @@ class ConnectionUI(Frame):
         self.__initUI()
 
     def __initUI(self):
+        """
+        Initialize UI with two entry fields and a connection button."""
+
         self.parent.title('Connect to a Sudoku server')
         self.pack(fill=BOTH, expand=1)
 
@@ -99,6 +107,10 @@ class ConnectionUI(Frame):
 
 
 class LobbyUI(Frame):
+    """
+    Sudoku multiplayer lobby UI class.
+    In case of incorrect inputs error messages are shown.
+    """
     action = None
 
     def __init__(self, parent):
@@ -108,6 +120,9 @@ class LobbyUI(Frame):
         self.__initUI()
 
     def __initUI(self):
+        """
+        Initialize UI with a list and required entry fields and submit buttons."""
+
         self.parent.title('Multiplayer Game')
         self.pack(fill=BOTH, expand=1)
 

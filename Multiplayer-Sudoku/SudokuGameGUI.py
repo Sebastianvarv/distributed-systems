@@ -1,4 +1,3 @@
-import argparse
 from Tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM
 
 MARGIN = 20  # Pixels around the board
@@ -7,6 +6,9 @@ WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
 
 
 class SudokuUI(Frame):
+    """
+    Sudoku grid UI class."""
+
     def __init__(self, parent, board):
         self.game = board
         Frame.__init__(self, parent)
@@ -21,6 +23,9 @@ class SudokuUI(Frame):
         self.__initUI()
 
     def __initUI(self):
+        """
+        Initialize sudoku playing field grid and bind clicking and entry handlers."""
+
         self.parent.title("Sudoku")
         self.pack(fill=BOTH, expand=1)
         self.canvas = Canvas(self,
@@ -36,7 +41,8 @@ class SudokuUI(Frame):
 
     def __draw_grid(self):
         """
-        Draws grid divided with blue lines into 3x3 squares """
+        Draw Sudoku 3x3 x 3x3 grid."""
+
         for i in xrange(10):
             color = "blue" if i % 3 == 0 else "gray"
 
@@ -53,6 +59,9 @@ class SudokuUI(Frame):
             self.canvas.create_line(x0, y0, x1, y1, fill=color)
 
     def __draw_puzzle(self):
+        """
+        Draw Sudoku solution numbers."""
+
         self.canvas.delete("numbers")
         for i in xrange(9):
             for j in xrange(9):
@@ -65,6 +74,10 @@ class SudokuUI(Frame):
                     )
 
     def __cell_clicked(self, event):
+        """
+        Handle a single cell click and highlight the clicked cell.
+        :param event:
+        """
         x, y = event.x, event.y
         if MARGIN < x < WIDTH - MARGIN and MARGIN < y < HEIGHT - MARGIN:
             self.canvas.focus_set()
@@ -81,6 +94,9 @@ class SudokuUI(Frame):
         self.__draw_cursor()
 
     def __draw_cursor(self):
+        """
+        Draw the red outline for the selected square."""
+
         self.canvas.delete("cursor")
         if self.row >= 0 and self.col >= 0:
             x0 = MARGIN + self.col * SIDE + 1
@@ -93,14 +109,26 @@ class SudokuUI(Frame):
             )
 
     def __key_pressed(self, event):
+        """
+        Handle solution number entry."""
+
         if self.row >= 0 and self.col >= 0 and event.char in "123456789":
-            # self.game.board[self.row][self.col] = int(event.char)
             self.new_entry = (self.row, self.col, int(event.char))
             self.col, self.row = -1, -1
             self.__draw_puzzle()
             self.__draw_cursor()
 
     def update_board(self, root, board, new_game_state):
+        """
+        Update board during the gameplay. If all players are not connected, solution entry is not permitted.
+        In case of a wrong answer the selected square is flashed red for a fraction of a second to notify
+        the player about his life decisions.
+
+        :param root:
+        :param board:
+        :param new_game_state:
+        :return entered value:
+        """
         return_val = None
 
         # Check for game state, if it is "0", just return, else continue the game
@@ -141,8 +169,7 @@ class SudokuUI(Frame):
 
 class SudokuBoard(object):
     """
-    Sudoku Board representation
-    """
+    Sudoku Board representation"""
 
     def __init__(self, board):
         self.board = self.__create_board(board)
