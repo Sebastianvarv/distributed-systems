@@ -194,9 +194,8 @@ if __name__ == "__main__":
     root = Tk()
     root.protocol("WM_DELETE_WINDOW", on_close)
 
-    port, nickname = input_main(root)
-    LOG.debug("Port: %d, nickname: %s" % (port, nickname))
-    user_id = reg_user(nickname, port)
+    user_id, port = input_main(root)
+    LOG.debug('Closing input window.')
     active_client = True
 
     while active_client:

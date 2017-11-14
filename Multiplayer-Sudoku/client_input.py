@@ -1,5 +1,6 @@
 from Tkinter import Frame, Button, BOTH, Entry, Label, CENTER
 from ttk import Treeview
+from client import *
 import tkMessageBox
 import logging
 
@@ -27,17 +28,17 @@ class ConnectionUI(Frame):
         self.__initUI()
 
     def __initUI(self):
-        self.parent.title('Server connection')
+        self.parent.title('Connect to a Sudoku server')
         self.pack(fill=BOTH, expand=1)
 
-        Label(self, text='Insert port').grid(row=0, padx=(35, 0))
-        Label(self, text='Insert name').grid(row=1, padx=(35, 0))
-
-        self.entry_port = Entry(self)
-        self.entry_port.grid(row=0, column=1)
+        Label(self, text='Enter Nickname').grid(row=0, padx=(15, 0))
+        Label(self, text='Enter Sudoku server port').grid(row=1, padx=(15, 0))
 
         self.entry_nickname = Entry(self)
-        self.entry_nickname.grid(row=1, column=1)
+        self.entry_nickname.grid(row=0, column=1, padx=(0, 15))
+
+        self.entry_port = Entry(self)
+        self.entry_port.grid(row=1, column=1, padx=(0, 15))
 
         self.submit_name = Button(self, text='Submit and connect', command=self.__submit_connect)
         self.submit_name.grid(row=2, column=1)
@@ -107,7 +108,7 @@ class LobbyUI(Frame):
         self.__initUI()
 
     def __initUI(self):
-        self.parent.title('Sudoku Lobby')
+        self.parent.title('Multiplayer Game')
         self.pack(fill=BOTH, expand=1)
 
         self.lobby_list = Treeview(self, columns=('room', 'players'))
@@ -118,10 +119,10 @@ class LobbyUI(Frame):
         self.lobby_list.column('players', width=100, anchor=CENTER)
         self.lobby_list.grid(row=1, column=0, columnspan=2, rowspan=2, padx=20, pady=(10, 0))
 
-        self.connect_lobby = Button(self, text='Join existing game', command=self.__connect_lobby)
+        self.connect_lobby = Button(self, text='Joining Sudoku\n Solving Session', command=self.__connect_lobby)
         self.connect_lobby.grid(row=3, column=1, pady=(0, 10))
 
-        Label(self, text='Create and join a new\n game with n players:').grid(row=4, column=0)
+        Label(self, text='Creating new Sudoku\n solving session:').grid(row=4, column=0)
 
         self.max_players = Entry(self)
         self.max_players.grid(row=4, column=1)
@@ -213,9 +214,22 @@ def input_main(root):
     while True:
         root.update()
         if client_window.port is not None and client_window.nickname is not None:
-            LOG.debug('Closing input window.')
-            client_window.destroy()
-            return client_window.port, client_window.nickname
+            LOG.debug("Port: %d, nickname: %s" % (client_window.port, client_window.nickname))
+            user_id = None
+
+            try:
+                user_id = reg_user(client_window.nickname, client_window.port)
+            except Exception as err:
+                client_window.port, client_window.nickname = None, None
+
+                tkMessageBox.showwarning(
+                    "Connection error",
+                    str(err)
+                )
+
+            if user_id is not None:
+                client_window.destroy()
+                return user_id, client_window.port
 
 
 def initiate_lobby(root):
