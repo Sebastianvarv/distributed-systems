@@ -38,6 +38,7 @@ def refresh_game_state(game_state):
     if game_progression == 2:
         # TODO: If game is finished use a different handler perhaps?
         pass
+        # Return something different than the usual board_changed shit that can be used to break the game loop.
 
     return board_changed
 
@@ -51,7 +52,15 @@ def refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed=None):
     board_changed = refresh_game_state(game_state)
 
     time.sleep(0.2)
-    refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed)
+    return board_changed
+
+
+def refresh_game_loopy(sudoku_ui, game_id, port, root, user_id):
+    board_changed = None
+
+    while True:
+        board_changed = refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed)
+        # Something needs to come out of refresh game to kick up the 4d3d3d3 and break the cycle
 
 
 if __name__ == "__main__":
@@ -97,4 +106,4 @@ if __name__ == "__main__":
     sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
     root.geometry("%dx%d" % (SudokuGameGUI.WIDTH, SudokuGameGUI.HEIGHT))
 
-    sudoku_refresh_thread = threading.Thread(target=refresh_game(sudoku_ui, game_id, port, root, user_id))
+    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, root, user_id))

@@ -93,7 +93,7 @@ class SudokuUI(Frame):
             )
 
     def __key_pressed(self, event):
-        if self.row >= 0 and self.col >= 0 and event.char in "1234567890":
+        if self.row >= 0 and self.col >= 0 and event.char in "123456789":
             # self.game.board[self.row][self.col] = int(event.char)
             self.new_entry = (self.row, self.col, int(event.char))
             self.col, self.row = -1, -1
@@ -110,6 +110,10 @@ class SudokuUI(Frame):
             if new_game_state != 0:
                 self.game_state = new_game_state
             return return_val
+
+        print self.previous_guess[0]
+        print self.previous_guess[1]
+        print self.previous_guess[2]
 
         # If previous guess was not correct flash it red
         if self.previous_guess is not None and board[self.previous_guess[0]][self.previous_guess[1]] != \
