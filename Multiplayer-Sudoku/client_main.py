@@ -72,7 +72,7 @@ def refresh_game_state(sudoku_ui, game_state):
     board, scores, game_progression = game_state
     keep_playing = True
 
-    board_changed = sudoku_ui.update_board(root, board, game_progression)
+    board_changed = sudoku_ui.update_board(root, board, scores, game_progression)
 
     if game_progression == 2:
         keep_playing = False
@@ -209,7 +209,7 @@ def main_sudoku(root, lobby_data):
 
     game = SudokuGameGUI.SudokuBoard(board)
     sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
-    root.geometry("%dx%d" % (SudokuGameGUI.WIDTH, SudokuGameGUI.HEIGHT))
+    root.geometry("%dx%d" % (SudokuGameGUI.TOTAL_WIDTH, SudokuGameGUI.HEIGHT))
 
     sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, user_id))
 

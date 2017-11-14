@@ -1,8 +1,10 @@
-from Tkinter import Tk, Canvas, Frame, Button, BOTH, TOP, BOTTOM
+from Tkinter import Canvas, Frame, BOTH, CENTER
+from ttk import Treeview
 
 MARGIN = 20  # Pixels around the board
 SIDE = 50  # Width of every board cell.
-WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Width and height of the whole board
+WIDTH = HEIGHT = MARGIN * 2 + SIDE * 9  # Height and width of the game board
+TOTAL_WIDTH = WIDTH + 180
 
 
 class SudokuUI(Frame):
@@ -22,6 +24,8 @@ class SudokuUI(Frame):
 
         self.game_state = 0
 
+        self.scores = []
+
         self.__initUI()
 
     def __initUI(self):
@@ -33,10 +37,11 @@ class SudokuUI(Frame):
         self.canvas = Canvas(self,
                              width=WIDTH,
                              height=HEIGHT)
-        self.canvas.pack(fill=BOTH, side=TOP)
+        self.canvas.grid(row=1, column=0)
 
         self.__draw_grid()
         self.__draw_puzzle()
+        self.__draw_scores()
 
         self.canvas.bind("<Button-1>", self.__cell_clicked)
         self.canvas.bind("<Key>", self.__key_pressed)
@@ -120,7 +125,23 @@ class SudokuUI(Frame):
             self.__draw_puzzle()
             self.__draw_cursor()
 
-    def update_board(self, root, board, new_game_state):
+    def __draw_scores(self):
+        self.score_list = Treeview(self, columns=('name', 'score'))
+        self.score_list['show'] = 'headings'
+        self.score_list.heading('name', text='Name')
+        self.score_list.column('name', width=80, anchor=CENTER)
+        self.score_list.heading('score', text='Score')
+        self.score_list.column('score', width=80, anchor=CENTER)
+        # self.score_list.pack(side=RIGHT)
+
+        self.score_list.grid(row=1, column=1, padx=(0, 20))
+
+    def __update_scores(self, scores):
+        self.score_list.delete(*self.score_list.get_children())
+        for entry in scores:
+            self.score_list.insert('', 'end', values=(entry[0], entry[1]))
+
+    def update_board(self, root, board, scores, new_game_state):
         """
         Update board during the gameplay. If all players are not connected, solution entry is not permitted.
         In case of a wrong answer the selected square is flashed red for a fraction of a second to notify
@@ -132,6 +153,8 @@ class SudokuUI(Frame):
         :return entered value:
         """
         return_val = None
+
+        self.__update_scores(scores)
 
         # Check for game state, if it is "0", just return, else continue the game
         if self.game_state == 0:
