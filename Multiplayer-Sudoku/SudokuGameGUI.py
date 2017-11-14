@@ -120,7 +120,7 @@ class SudokuUI(Frame):
         """
         Handle solution number entry."""
 
-        if self.row >= 0 and self.col >= 0 and event.char in "123456789":
+        if self.row >= 0 and self.col >= 0 and event.char in "123456789" and self.game_state == 1:
             self.new_entry = (self.row, self.col, int(event.char))
             self.col, self.row = -1, -1
             self.__draw_puzzle()
