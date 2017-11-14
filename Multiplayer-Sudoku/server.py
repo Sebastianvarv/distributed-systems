@@ -15,62 +15,62 @@ from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_INIT_GAME, __RSP_OK, __REQ_CONNECT_SERVER_PORT, __RSP_GAME_FULL_ERROR, __REQ_GET_STATE
 
 
-def parse_msg(msg):
-    msg_header, msg = msg.split(__MSG_FIELD_SEP, 1)
+def parse_msg(message, client_sock):
+    msg_header, message = message.split(__MSG_FIELD_SEP, 1)
     if msg_header == __REQ_REG_USER:
         # Arguments: nick_name
         # Returns: Player uid
-        username = msg
+        username = message
         uid = str(__PLAYERS.reg_player(username))
-        client_socket.send(__RSP_OK + __MSG_FIELD_SEP + uid)
+        client_sock.send(__RSP_OK + __MSG_FIELD_SEP + uid)
 
     elif msg_header == __REQ_GET_GAMES:
-        print("Get games", msg)
+        print("Get games", message)
         resp = __GAMES.get_tuple()
         resp = pickle.dumps(resp)
-        client_socket.send(__RSP_OK + __MSG_FIELD_SEP + resp)
+        client_sock.send(__RSP_OK + __MSG_FIELD_SEP + resp)
 
     elif msg_header == __REQ_CREATE_GAME:
-        print("Create game", msg)
-        player_uid, max_players = msg.split(__MSG_FIELD_SEP, 1)
+        print("Create game", message)
+        player_uid, max_players = message.split(__MSG_FIELD_SEP, 1)
         game_uid = __GAMES.create_game(max_players)
         game = __GAMES.get_game(game_uid)
         game.add_player(player_uid)
 
         state = pickle.dumps(game.get_state(__PLAYERS))
-        client_socket.send(__RSP_OK + __MSG_FIELD_SEP + game_uid + __MSG_FIELD_SEP + state)
+        client_sock.send(__RSP_OK + __MSG_FIELD_SEP + game_uid + __MSG_FIELD_SEP + state)
 
 
     elif msg_header == __REQ_ADD_PLAYER_TO_GAMEROOM:
-        print("Add player to gameroom", msg)
-        player_id, game_id = msg.split(__MSG_FIELD_SEP, 1)
+        print("Add player to gameroom", message)
+        player_id, game_id = message.split(__MSG_FIELD_SEP, 1)
         game = __GAMES.get_game(game_id)
 
         if len(game.scores) != game.max_players:
             game.add_player(player_id)
             state = pickle.dumps(game.get_state(__PLAYERS))
-            client_socket.send(__RSP_OK + __MSG_FIELD_SEP + state)
+            client_sock.send(__RSP_OK + __MSG_FIELD_SEP + state)
         else:
-            client_socket.send(__RSP_GAME_FULL_ERROR + __MSG_FIELD_SEP)
+            client_sock.send(__RSP_GAME_FULL_ERROR + __MSG_FIELD_SEP)
 
 
     elif msg_header == __REQ_MAKE_MOVE:
-        print("Making a move", msg)
-        player_id, game_id, x_coord, y_coord, val = msg.split(__MSG_FIELD_SEP, 4)
+        print("Making a move", message)
+        player_id, game_id, x_coord, y_coord, val = message.split(__MSG_FIELD_SEP, 4)
         game = __GAMES.get_game(game_id)
         game.make_move(player_id, int(x_coord), int(y_coord), int(val))
         state = pickle.dumps(game.get_state(__PLAYERS))
-        client_socket.send(__RSP_OK + __MSG_FIELD_SEP + state)
+        client_sock.send(__RSP_OK + __MSG_FIELD_SEP + state)
 
     elif msg_header == __REQ_GET_STATE:
-        print("Get state", msg)
-        game_id = msg
+        print("Get state", message)
+        game_id = message
         game = __GAMES.get_game(game_id)
         state = pickle.dumps(game.get_state(__PLAYERS))
-        client_socket.send(__RSP_OK + __MSG_FIELD_SEP + state)
+        client_sock.send(__RSP_OK + __MSG_FIELD_SEP + state)
 
     elif msg_header == __REQ_CONNECT_SERVER_PORT:
-        client_socket.send(__RSP_OK)
+        client_sock.send(__RSP_OK)
 
 
 if __name__ == '__main__':
@@ -96,7 +96,7 @@ if __name__ == '__main__':
             msg = client_socket.recv(1024)
 
             print "Server received a message:" + msg
-            msg_parse_thread = threading.Thread(parse_msg(msg))
+            msg_parse_thread = threading.Thread(parse_msg(msg, client_socket))
             msg_parse_thread.start()
 
 

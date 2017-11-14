@@ -29,7 +29,7 @@ class Game:
     def __init__(self, max_players):
         self.solution, self.board = read_solution()
         self.scores = {}
-        self.max_players = max_players
+        self.max_players = int(max_players)
         self.game_state = 0
 
     def make_move(self, user_id, x, y, value):
