@@ -250,7 +250,7 @@ def main_sudoku(root, lobby_data):
     sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
     root.geometry("%dx%d" % (SudokuGameGUI.TOTAL_WIDTH, SudokuGameGUI.HEIGHT))
 
-    sudoku_listen_thread = threading.Thread(target=update_game_helper(sudoku_ui, game_id, port, user_id))
+    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, user_id))
 
 
 def on_close():
