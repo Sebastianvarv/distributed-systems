@@ -4,11 +4,14 @@ from socket import socket, AF_INET, SOCK_STREAM
 import pickle
 import sys
 
+import logging
+
 from games import Games
 from players import Players
 
 __PLAYERS = Players()
 __GAMES = Games()
+LOG = logging.getLogger()
 
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_CREATE_GAME, __REQ_ADD_PLAYER_TO_GAMEROOM, __REQ_MAKE_MOVE, \
@@ -33,14 +36,14 @@ def parse_msg(message, client_sock):
 
     elif msg_header == __REQ_GET_GAMES:
         # Returns all games
-        print("Get games", message)
+        LOG.info("Get games " + message)
         resp = __GAMES.get_tuple()
         resp = pickle.dumps(resp)
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP + resp)
 
     elif msg_header == __REQ_CREATE_GAME:
         # Creates game and returns it's state
-        print("Create game", message)
+        LOG.info("Create game " + message)
         player_uid, max_players = message.split(__MSG_FIELD_SEP, 1)
         game_uid = __GAMES.create_game(max_players)
         game = __GAMES.get_game(game_uid)
@@ -51,7 +54,7 @@ def parse_msg(message, client_sock):
 
     elif msg_header == __REQ_ADD_PLAYER_TO_GAMEROOM:
         # Adds player to selected game room
-        print("Add player to gameroom", message)
+        LOG.info("Add player to gameroom " + message)
         player_id, game_id = message.split(__MSG_FIELD_SEP, 1)
         game = __GAMES.get_game(game_id)
 
@@ -64,7 +67,7 @@ def parse_msg(message, client_sock):
 
     elif msg_header == __REQ_MAKE_MOVE:
         # Makes move on selected board
-        print("Making a move", message)
+        LOG.info("Making a move " + message)
         player_id, game_id, x_coord, y_coord, val = message.split(__MSG_FIELD_SEP, 4)
         game = __GAMES.get_game(game_id)
         game.make_move(player_id, int(x_coord), int(y_coord), int(val))
@@ -73,7 +76,7 @@ def parse_msg(message, client_sock):
 
     elif msg_header == __REQ_GET_STATE:
         # Returns current game state
-        print("Get state", message)
+        LOG.info("Get state " + message)
         game_id = message
         game = __GAMES.get_game(game_id)
         state = pickle.dumps(game.get_state(__PLAYERS))
@@ -81,14 +84,14 @@ def parse_msg(message, client_sock):
 
     elif msg_header == __REQ_REMOVE_PLAYER:
         # Removes player form the game room
-        print("Remove player from game")
+        LOG.info("Remove player from game")
         game_id, player_id = message.split(__MSG_FIELD_SEP, 1)
         __GAMES.remove_player_from_game(game_id, player_id)
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP)
 
     elif msg_header == __REQ_REMOVE_PLAYER_LOBBY:
         # Remove player from the lobby
-        print("Remove player from lobby")
+        LOG.info("Remove player from lobby")
         player_id = message
         __PLAYERS.remove_player(player_id)
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP)
@@ -113,13 +116,12 @@ if __name__ == '__main__':
     server_socket.bind(('127.0.0.1', port))
     server_socket.listen(10)
 
-    print "Server started on port: " + str(port)
+    LOG.info("Server started on port: " + str(port))
     while True:
         try:
             client_socket, source = server_socket.accept()
             msg = client_socket.recv(1024)
-
-            print "Server received a message:" + msg
+            LOG.debug("Server received a message:" + msg)
             msg_parse_thread = threading.Thread(parse_msg(msg, client_socket))
             msg_parse_thread.start()
 
