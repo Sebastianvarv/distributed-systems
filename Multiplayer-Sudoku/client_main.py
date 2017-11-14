@@ -18,6 +18,14 @@ hard_exit = False
 
 
 def refresh_lobby(root, port, room_window):
+    """
+    Polls the server for its game list and updates the visual list with the new data.
+
+    :param root:
+    :param port:
+    :param room_window:
+    :return loop ending boolean:
+    """
     global lobby_data
     games = req_get_games(port)
     update_lobby(root, games)
@@ -34,6 +42,14 @@ def refresh_lobby(root, port, room_window):
 
 
 def refresh_lobby_loopy(root, port, room_window):
+    """
+    This is the game lobby updater function.
+
+    :param root:
+    :param port:
+    :param room_window:
+    :return:
+    """
     global hard_exit
     keep_refreshing = True
 
@@ -46,6 +62,13 @@ def refresh_lobby_loopy(root, port, room_window):
 
 
 def refresh_game_state(sudoku_ui, game_state):
+    """
+    Calls the Sudoku UI game board visual state update.
+
+    :param sudoku_ui:
+    :param game_state:
+    :return:
+    """
     board, scores, game_progression = game_state
     keep_playing = True
 
@@ -58,6 +81,16 @@ def refresh_game_state(sudoku_ui, game_state):
 
 
 def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
+    """
+    Gets updated game state from server to refresh the visual game state if needed.
+
+    :param sudoku_ui:
+    :param game_id:
+    :param port:
+    :param user_id:
+    :param board_changed:
+    :return loop ending boolean, board change for the next iteration:
+    """
     if board_changed is not None:
         game_state = req_make_move(user_id, game_id, board_changed[0], board_changed[1], board_changed[2], port)
     else:
@@ -70,6 +103,15 @@ def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
 
 
 def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
+    """
+    This is the main game updater function.
+
+    :param sudoku_ui:
+    :param game_id:
+    :param port:
+    :param user_id:
+    :return:
+    """
     global hard_exit
     board_changed = None
     keep_playing = True
@@ -84,6 +126,13 @@ def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
 
 
 def main_lobby(root, port):
+    """
+    Runs the main game lobby thread.
+
+    :param root:
+    :param port:
+    :return:
+    """
     global lobby_data
 
     room_window = initiate_lobby(root)
@@ -97,6 +146,13 @@ def main_lobby(root, port):
 
 
 def main_sudoku(root, lobby_data):
+    """
+    Runs the main sudoku game thread.
+
+    :param root:
+    :param lobby_data:
+    :return:
+    """
     action, value = lobby_data
     game_state = None
 
@@ -123,6 +179,12 @@ def main_sudoku(root, lobby_data):
 
 
 def on_close():
+    """
+    Handling window close as a prompt.
+    If user is okay with leaving, a global variable is set to exit and will be read in appropriate context
+    to close the current window.
+    :return:
+    """
     global hard_exit
     if tkMessageBox.askokcancel("Quit", "Do you want to quit?"):
         hard_exit = True
