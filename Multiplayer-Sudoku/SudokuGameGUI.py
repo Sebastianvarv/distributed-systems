@@ -111,10 +111,6 @@ class SudokuUI(Frame):
                 self.game_state = new_game_state
             return return_val
 
-        # print self.previous_guess[0]
-        # print self.previous_guess[1]
-        # print self.previous_guess[2]
-
         # If previous guess was not correct flash it red
         if self.previous_guess is not None and board[self.previous_guess[0]][self.previous_guess[1]] != \
                 self.previous_guess[2]:

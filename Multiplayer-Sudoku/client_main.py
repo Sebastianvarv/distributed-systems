@@ -1,9 +1,9 @@
 from Tkinter import Tk
+import tkMessageBox
 from client_input import input_main, initiate_lobby, update_lobby, destroy_lobby_window
 from client import *
 import time
 import threading
-import sys
 import SudokuGameGUI
 
 # Setup logging
@@ -14,9 +14,18 @@ LOG = logging.getLogger()
 sudoku_refresh_thread = None
 lobby_refresh_thread = None
 lobby_data = None
+hard_exit = False
 
 
 def refresh_lobby(root, port, room_window):
+    """
+    Polls the server for its game list and updates the visual list with the new data.
+
+    :param root:
+    :param port:
+    :param room_window:
+    :return loop ending boolean:
+    """
     global lobby_data
     games = req_get_games(port)
     update_lobby(root, games)
@@ -33,55 +42,98 @@ def refresh_lobby(root, port, room_window):
 
 
 def refresh_lobby_loopy(root, port, room_window):
+    """
+    This is the game lobby updater function.
+
+    :param root:
+    :param port:
+    :param room_window:
+    :return:
+    """
+    global hard_exit
     keep_refreshing = True
 
     while keep_refreshing:
+        if hard_exit:
+            room_window.destroy()
+            break
+
         keep_refreshing = refresh_lobby(root, port, room_window)
 
 
-def refresh_game_state(game_state):
+def refresh_game_state(sudoku_ui, game_state):
+    """
+    Calls the Sudoku UI game board visual state update.
+
+    :param sudoku_ui:
+    :param game_state:
+    :return:
+    """
     board, scores, game_progression = game_state
     keep_playing = True
-    print "I am game progression: " + str(game_progression)
 
     board_changed = sudoku_ui.update_board(root, board, game_progression)
 
     if game_progression == 2:
-        # TODO: If game is finished use a different handler perhaps?
-        pass
-        # Return something different than the usual board_changed shit that can be used to break the game loop.
         keep_playing = False
 
     return board_changed, keep_playing
 
 
-def refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed=None):
+def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
+    """
+    Gets updated game state from server to refresh the visual game state if needed.
+
+    :param sudoku_ui:
+    :param game_id:
+    :param port:
+    :param user_id:
+    :param board_changed:
+    :return loop ending boolean, board change for the next iteration:
+    """
     if board_changed is not None:
         game_state = req_make_move(user_id, game_id, board_changed[0], board_changed[1], board_changed[2], port)
     else:
         game_state = req_get_state(game_id, port)
 
-    board_changed, keep_playing = refresh_game_state(game_state)
+    board_changed, keep_playing = refresh_game_state(sudoku_ui, game_state)
 
     time.sleep(0.2)
     return board_changed, keep_playing
 
 
-def refresh_game_loopy(sudoku_ui, game_id, port, root, user_id):
+def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
+    """
+    This is the main game updater function.
+
+    :param sudoku_ui:
+    :param game_id:
+    :param port:
+    :param user_id:
+    :return:
+    """
+    global hard_exit
     board_changed = None
     keep_playing = True
 
     while keep_playing:
-        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, root, user_id, board_changed)
-        # Something needs to come out of refresh game to kick up the 4d3d3d3 and break the cycle
+        if hard_exit:
+            sudoku_ui.destroy()
+            hard_exit = False
+            break
+
+        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
 
 
-if __name__ == "__main__":
-    root = Tk()
-    port, nickname = input_main(root)
-    LOG.debug("Port: %d, nickname: %s" % (port, nickname))
+def main_lobby(root, port):
+    """
+    Runs the main game lobby thread.
 
-    user_id = reg_user(nickname, port)
+    :param root:
+    :param port:
+    :return:
+    """
+    global lobby_data
 
     room_window = initiate_lobby(root)
 
@@ -90,10 +142,17 @@ if __name__ == "__main__":
 
     LOG.debug("Final lobby data is " + str(lobby_data))
 
-    if lobby_data is None:
-        LOG.error("Could not fetch data about game creation/selection")
-        sys.exit(1)
+    return lobby_data
 
+
+def main_sudoku(root, lobby_data):
+    """
+    Runs the main sudoku game thread.
+
+    :param root:
+    :param lobby_data:
+    :return:
+    """
     action, value = lobby_data
     game_state = None
 
@@ -113,10 +172,43 @@ if __name__ == "__main__":
     LOG.debug("Game state is " + str(game_progression))
 
     game = SudokuGameGUI.SudokuBoard(board)
-
-    LOG.debug(game.board)
-
     sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
     root.geometry("%dx%d" % (SudokuGameGUI.WIDTH, SudokuGameGUI.HEIGHT))
 
-    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, root, user_id))
+    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, user_id))
+
+
+def on_close():
+    """
+    Handling window close as a prompt.
+    If user is okay with leaving, a global variable is set to exit and will be read in appropriate context
+    to close the current window.
+    :return:
+    """
+    global hard_exit
+    if tkMessageBox.askokcancel("Quit", "Do you want to quit?"):
+        hard_exit = True
+
+
+if __name__ == "__main__":
+    root = Tk()
+    root.protocol("WM_DELETE_WINDOW", on_close)
+
+    user_id, port = input_main(root)
+    LOG.debug('Closing input window.')
+    active_client = True
+
+    while active_client:
+        lobby_data = main_lobby(root, port)
+
+        # If we exited lobby permanently then break.
+        if hard_exit:
+            break
+
+        # If lobby returned odd stuff, then start again.
+        if lobby_data is None:
+            continue
+
+        # If we got here, then we're ready to play.
+        main_sudoku(root, lobby_data)
+
