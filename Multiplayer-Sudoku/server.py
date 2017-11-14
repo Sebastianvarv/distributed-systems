@@ -16,6 +16,12 @@ from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
 
 
 def parse_msg(message, client_sock):
+    """
+    Method for parsing message and sending response to client
+    :param message: message received by server
+    :param client_sock: Client socket
+    :return: None
+    """
     msg_header, message = message.split(__MSG_FIELD_SEP, 1)
     if msg_header == __REQ_REG_USER:
         # Arguments: nick_name
@@ -25,12 +31,14 @@ def parse_msg(message, client_sock):
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP + uid)
 
     elif msg_header == __REQ_GET_GAMES:
+        # Returns all games
         print("Get games", message)
         resp = __GAMES.get_tuple()
         resp = pickle.dumps(resp)
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP + resp)
 
     elif msg_header == __REQ_CREATE_GAME:
+        # Creates game and returns it's state
         print("Create game", message)
         player_uid, max_players = message.split(__MSG_FIELD_SEP, 1)
         game_uid = __GAMES.create_game(max_players)
@@ -40,8 +48,8 @@ def parse_msg(message, client_sock):
         state = pickle.dumps(game.get_state(__PLAYERS))
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP + game_uid + __MSG_FIELD_SEP + state)
 
-
     elif msg_header == __REQ_ADD_PLAYER_TO_GAMEROOM:
+        # Adds player to selected game room
         print("Add player to gameroom", message)
         player_id, game_id = message.split(__MSG_FIELD_SEP, 1)
         game = __GAMES.get_game(game_id)
@@ -53,8 +61,8 @@ def parse_msg(message, client_sock):
         else:
             client_sock.send(__RSP_GAME_FULL_ERROR + __MSG_FIELD_SEP)
 
-
     elif msg_header == __REQ_MAKE_MOVE:
+        # Makes move on selected board
         print("Making a move", message)
         player_id, game_id, x_coord, y_coord, val = message.split(__MSG_FIELD_SEP, 4)
         game = __GAMES.get_game(game_id)
@@ -63,6 +71,7 @@ def parse_msg(message, client_sock):
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP + state)
 
     elif msg_header == __REQ_GET_STATE:
+        # Returns current game state
         print("Get state", message)
         game_id = message
         game = __GAMES.get_game(game_id)
@@ -70,6 +79,7 @@ def parse_msg(message, client_sock):
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP + state)
 
     elif msg_header == __REQ_REMOVE_PLAYER:
+        # Removes player
         print("Remove player from game")
         game_id, player_id = message.split(__MSG_FIELD_SEP, 1)
         __GAMES.remove_player_from_game(game_id, player_id)
