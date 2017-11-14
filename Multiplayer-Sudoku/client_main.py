@@ -26,7 +26,16 @@ def refresh_lobby(root, port, room_window):
     :return loop ending boolean:
     """
     global lobby_data
-    games = req_get_games(port)
+    global hard_exit
+
+    games = []
+    try:
+        games = req_get_games(port)
+    except Exception as err:
+        tkMessageBox.showwarning("Connection error", str(err))
+        hard_exit = True
+        return
+
     update_lobby(room_window, games)
 
     lobby_data = room_window.action
@@ -56,7 +65,12 @@ def refresh_lobby_loopy(root, port, room_window, user_id):
             room_window.destroy()
 
             # Remove player from the list of players in the server
-            req_remove_player_lobby(user_id, port)
+            try:
+                req_remove_player_lobby(user_id, port)
+            except Exception as err:
+                tkMessageBox.showwarning("Connection error", str(err))
+                hard_exit = True
+
             break
 
         keep_refreshing = refresh_lobby(root, port, room_window)
@@ -91,10 +105,18 @@ def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
     :param board_changed:
     :return loop ending boolean, board change for the next iteration:
     """
-    if board_changed is not None:
-        game_state = req_make_move(user_id, game_id, board_changed[0], board_changed[1], board_changed[2], port)
-    else:
-        game_state = req_get_state(game_id, port)
+    global hard_exit
+
+    try:
+        if board_changed is not None:
+            game_state = req_make_move(user_id, game_id, board_changed[0], board_changed[1], board_changed[2], port)
+        else:
+            game_state = req_get_state(game_id, port)
+
+    except Exception as err:
+        tkMessageBox.showwarning("Connection error", str(err))
+        hard_exit = True
+        return False, False
 
     board_changed, keep_playing = refresh_game_state(sudoku_ui, game_state, user_id)
 
@@ -121,13 +143,19 @@ def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
             hard_exit = False
 
             # Remove player from game
-            req_remove_player(game_id, user_id, port)
+            try:
+                req_remove_player(game_id, user_id, port)
+            except Exception as err:
+                tkMessageBox.showwarning("Connection error", str(err))
             break
 
         board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
 
     sudoku_ui.destroy()
-    req_remove_player(game_id, user_id, port)
+    try:
+        req_remove_player(game_id, user_id, port)
+    except Exception as err:
+        tkMessageBox.showwarning("Connection error", str(err))
 
 
 def main_input(root):
@@ -191,10 +219,21 @@ def main_sudoku(root, lobby_data):
 
     if action == "create":
         LOG.debug("Creating new game by request of user")
-        game_id, game_state = req_create_game(user_id, value, port)
+
+        try:
+            game_id, game_state = req_create_game(user_id, value, port)
+        except Exception as err:
+            tkMessageBox.showwarning("Connection error", str(err))
+            return
+
     elif action == "select":
         game_id = value
-        game_state = req_join_game(user_id, game_id, port)
+
+        try:
+            game_state = req_join_game(user_id, game_id, port)
+        except Exception as err:
+            tkMessageBox.showwarning("Connection error", str(err))
+            return
 
     if not game_state:
         tkMessageBox.showwarning("Game error", "The selected room is full.")
