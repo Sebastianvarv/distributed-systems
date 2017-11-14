@@ -11,15 +11,15 @@ FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 LOG = logging.getLogger()
 
-sudoku_refresh_thread = None
-lobby_refresh_thread = None
+sudoku_listen_thread = None
+lobby_listen_thread = None
 lobby_data = None
 hard_exit = False
 
 
-def refresh_lobby(root, port, room_window):
+def update_lobby(root, port, room_window):
     """
-    Polls the server for its game list and updates the visual list with the new data.
+    Updates the visual list of game rooms with the new data.
     :param root:
     :param port:
     :param room_window:
@@ -49,7 +49,7 @@ def refresh_lobby(root, port, room_window):
         return True
 
 
-def refresh_lobby_loopy(root, port, room_window, user_id):
+def update_lobby_helper(root, port, room_window, user_id):
     """
     This is the game lobby updater function.
     :param root:
@@ -58,9 +58,9 @@ def refresh_lobby_loopy(root, port, room_window, user_id):
     :return:
     """
     global hard_exit
-    keep_refreshing = True
+    connected = True
 
-    while keep_refreshing:
+    while connected:
         if hard_exit:
             room_window.destroy()
 
@@ -73,10 +73,10 @@ def refresh_lobby_loopy(root, port, room_window, user_id):
 
             break
 
-        keep_refreshing = refresh_lobby(root, port, room_window)
+        connected = update_lobby(root, port, room_window)
 
 
-def refresh_game_state(sudoku_ui, game_state, user_id):
+def update_game_state(sudoku_ui, game_state, user_id):
     """
     Calls the Sudoku UI game board visual state update.
     :param sudoku_ui:
@@ -95,7 +95,7 @@ def refresh_game_state(sudoku_ui, game_state, user_id):
     return board_changed, keep_playing
 
 
-def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
+def update_game(sudoku_ui, game_id, port, user_id, board_changed=None):
     """
     Gets updated game state from server to refresh the visual game state if needed.
     :param sudoku_ui:
@@ -118,13 +118,13 @@ def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
         hard_exit = True
         return False, False
 
-    board_changed, keep_playing = refresh_game_state(sudoku_ui, game_state, user_id)
+    board_changed, keep_playing = update_game_state(sudoku_ui, game_state, user_id)
 
     time.sleep(0.2)
     return board_changed, keep_playing
 
 
-def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
+def update_game_helper(sudoku_ui, game_id, port, user_id):
     """
     This is the main game updater function.
     :param sudoku_ui:
@@ -149,7 +149,7 @@ def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
                 tkMessageBox.showwarning("Connection error", str(err))
             break
 
-        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
+        board_changed, keep_playing = update_game(sudoku_ui, game_id, port, user_id, board_changed)
 
     sudoku_ui.destroy()
     try:
@@ -160,7 +160,7 @@ def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
 
 def main_input(root):
     """
-    Keep polling input window until appropriate input is receiver and return it.
+    Update input window if appropriate input is received and return it.
     :param root:
     :return port, nickname:
     """
@@ -199,8 +199,8 @@ def main_lobby(root, port, user_id):
 
     room_window = initiate_lobby(root)
 
-    lobby_refresh_thread = threading.Thread(target=refresh_lobby_loopy(root, port, room_window, user_id))
-    lobby_refresh_thread.start()
+    lobby_listen_thread = threading.Thread(target=update_lobby_helper(root, port, room_window, user_id))
+    lobby_listen_thread.start()
 
     LOG.debug("Final lobby data is " + str(lobby_data))
 
@@ -251,7 +251,7 @@ def main_sudoku(root, lobby_data):
     sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
     root.geometry("%dx%d" % (SudokuGameGUI.TOTAL_WIDTH, SudokuGameGUI.HEIGHT))
 
-    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, user_id))
+    sudoku_listen_thread = threading.Thread(target=update_game_helper(sudoku_ui, game_id, port, user_id))
 
 
 def on_close():
