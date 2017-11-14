@@ -115,6 +115,9 @@ def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
         if hard_exit:
             sudoku_ui.destroy()
             hard_exit = False
+
+            # Remove player from game
+            req_remove_player(game_id, user_id, port)
             break
 
         board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
