@@ -1,6 +1,6 @@
 from Tkinter import Tk
 import tkMessageBox
-from client_input import input_main, initiate_lobby, update_lobby, destroy_lobby_window
+from client_input import initiate_input, initiate_lobby, update_lobby, destroy_lobby_window
 from client import *
 import time
 import threading
@@ -125,6 +125,36 @@ def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
         board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
 
 
+def main_input(root):
+    """
+    Keep polling input window until appropriate input is receiver and return it.
+    :param root:
+    :return port, nickname:
+    """
+    global hard_exit
+    client_window = initiate_input(root)
+
+    while True:
+        if hard_exit:
+            client_window.destroy()
+            return None, None
+
+        root.update()
+        if client_window.port is not None and client_window.nickname is not None:
+            LOG.debug("Port: %d, nickname: %s" % (client_window.port, client_window.nickname))
+            user_id = None
+
+            try:
+                user_id = reg_user(client_window.nickname, client_window.port)
+            except Exception as err:
+                client_window.port, client_window.nickname = None, None
+                tkMessageBox.showwarning("Connection error", str(err))
+
+            if user_id is not None:
+                client_window.destroy()
+                return user_id, client_window.port
+
+
 def main_lobby(root, port):
     """
     Runs the main game lobby thread.
@@ -194,9 +224,13 @@ if __name__ == "__main__":
     root = Tk()
     root.protocol("WM_DELETE_WINDOW", on_close)
 
-    user_id, port = input_main(root)
+    user_id, port = main_input(root)
     LOG.debug('Closing input window.')
-    active_client = True
+
+    if user_id is not None and port is not None:
+        active_client = True
+    else:
+        active_client = False
 
     while active_client:
         lobby_data = main_lobby(root, port)

@@ -217,34 +217,17 @@ class LobbyUI(Frame):
                     self.lobby_list.focus(item)
 
 
-def input_main(root):
+def initiate_input(root):
     """
     Create input UI and attach it to root.
-    Keep polling until appropriate input is receiver and return it.
+
     :param root:
-    :return port, nickname:
+    :return client window:
     """
     client_window = ConnectionUI(root)
     root.geometry('%dx%d' % (INPUT_WIDTH, INPUT_HEIGHT))
-    while True:
-        root.update()
-        if client_window.port is not None and client_window.nickname is not None:
-            LOG.debug("Port: %d, nickname: %s" % (client_window.port, client_window.nickname))
-            user_id = None
 
-            try:
-                user_id = reg_user(client_window.nickname, client_window.port)
-            except Exception as err:
-                client_window.port, client_window.nickname = None, None
-
-                tkMessageBox.showwarning(
-                    "Connection error",
-                    str(err)
-                )
-
-            if user_id is not None:
-                client_window.destroy()
-                return user_id, client_window.port
+    return client_window
 
 
 def initiate_lobby(root):
