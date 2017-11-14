@@ -46,7 +46,6 @@ def reg_user(username, server_port):
     header, resp = resp.split(__MSG_FIELD_SEP, 1)
     if header != __RSP_OK:
         LOG.error("Something went wrong with registering the user")
-        # TODO: handle error reg user
     __USER_ID = resp
     sock.shutdown(SHUT_WR)
     sock.close()
@@ -65,7 +64,6 @@ def req_get_games(server_port):
     header, resp = resp.split(__MSG_FIELD_SEP, 1)
     if header != __RSP_OK:
         LOG.error("Something went wrong while trying to fetch existing games")
-        #         TODO: handle error get games
     sock.shutdown(SHUT_WR)
     sock.close()
     resp = pickle.loads(resp)
@@ -87,7 +85,6 @@ def req_create_game(player_id, max_players, server_port):
     header, resp = resp.split(__MSG_FIELD_SEP, 1)
     if header != __RSP_OK:
         LOG.error("Something went wrong while trying to create game")
-        #         TODO: handle error create game
 
     sock.shutdown(SHUT_WR)
     sock.close()
@@ -115,7 +112,6 @@ def req_make_move(player_id, game_id, x_coord, y_coord, val, server_port):
     header, resp = resp.split(__MSG_FIELD_SEP, 1)
     if header != __RSP_OK:
         LOG.error("Something went wrong while trying to bust a move")
-        #         TODO: handle error create game
     state = pickle.loads(resp)
     sock.shutdown(SHUT_WR)
     sock.close()
@@ -146,7 +142,6 @@ def req_join_game(player_id, game_id, server_port):
         sock.close()
         return False
     else:
-        # TODO: handle more general connection etc error
         LOG.error("Something went wrong while trying to join the game room")
 
     sock.shutdown(SHUT_WR)
