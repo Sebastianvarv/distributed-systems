@@ -1,4 +1,5 @@
-from Tkinter import Frame, Button, BOTH, Entry, Label, CENTER
+# encoding: utf-8
+from Tkinter import Frame, Button, BOTH, Entry, Label, OptionMenu, StringVar, CENTER
 from ttk import Treeview
 from client import *
 import tkMessageBox
@@ -11,7 +12,7 @@ LOG = logging.getLogger()
 
 # Input sizes
 INPUT_WIDTH = 300
-INPUT_HEIGHT = 80
+INPUT_HEIGHT = 120
 
 # Lobby sizes
 LOBBY_WIDTH = 400
@@ -41,16 +42,24 @@ class ConnectionUI(Frame):
         self.pack(fill=BOTH, expand=1)
 
         Label(self, text='Enter Nickname').grid(row=0, padx=(15, 0))
-        Label(self, text='Enter Sudoku server port').grid(row=1, padx=(15, 0))
+        Label(self, text='Nickname presets').grid(row=1, padx=(15, 0))
+        Label(self, text='Enter Sudoku server port').grid(row=2, padx=(15, 0))
 
         self.entry_nickname = Entry(self)
         self.entry_nickname.grid(row=0, column=1, padx=(0, 15))
 
+        var = StringVar(self)
+        var.set('')
+
+        self.entry_nickname_options = OptionMenu(self, var, 'Peeter', 'Jürka', 'Antskan', 'Jüri', 'Toss',
+                                                 command=self.__select_preset)
+        self.entry_nickname_options.grid(row=1, column=1, padx=(0, 15))
+
         self.entry_port = Entry(self)
-        self.entry_port.grid(row=1, column=1, padx=(0, 15))
+        self.entry_port.grid(row=2, column=1, padx=(0, 15))
 
         self.submit_name = Button(self, text='Submit and connect', command=self.__submit_connect)
-        self.submit_name.grid(row=2, column=1)
+        self.submit_name.grid(row=3, column=1)
 
     def __submit_connect(self):
         """
@@ -90,6 +99,9 @@ class ConnectionUI(Frame):
             self.nickname = nickname
             self.port = port
 
+    def __select_preset(self, value):
+        self.entry_nickname.delete(0, 'end')
+        self.entry_nickname.insert('end', value)
 
 class LobbyUI(Frame):
     """
