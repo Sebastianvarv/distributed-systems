@@ -234,6 +234,7 @@ def initiate_lobby(root):
     """
     Create lobby UI and attach it to root.
     :param root:
+    :return lobby window:
     """
     room_window = LobbyUI(root)
     root.geometry('%dx%d' % (LOBBY_WIDTH, LOBBY_HEIGHT))

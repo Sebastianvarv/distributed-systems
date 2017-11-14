@@ -20,7 +20,6 @@ hard_exit = False
 def refresh_lobby(root, port, room_window):
     """
     Polls the server for its game list and updates the visual list with the new data.
-
     :param root:
     :param port:
     :param room_window:
@@ -44,7 +43,6 @@ def refresh_lobby(root, port, room_window):
 def refresh_lobby_loopy(root, port, room_window):
     """
     This is the game lobby updater function.
-
     :param root:
     :param port:
     :param room_window:
@@ -64,7 +62,6 @@ def refresh_lobby_loopy(root, port, room_window):
 def refresh_game_state(sudoku_ui, game_state):
     """
     Calls the Sudoku UI game board visual state update.
-
     :param sudoku_ui:
     :param game_state:
     :return:
@@ -83,7 +80,6 @@ def refresh_game_state(sudoku_ui, game_state):
 def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
     """
     Gets updated game state from server to refresh the visual game state if needed.
-
     :param sudoku_ui:
     :param game_id:
     :param port:
@@ -105,7 +101,6 @@ def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
 def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
     """
     This is the main game updater function.
-
     :param sudoku_ui:
     :param game_id:
     :param port:
@@ -158,7 +153,6 @@ def main_input(root):
 def main_lobby(root, port):
     """
     Runs the main game lobby thread.
-
     :param root:
     :param port:
     :return:
@@ -178,7 +172,6 @@ def main_lobby(root, port):
 def main_sudoku(root, lobby_data):
     """
     Runs the main sudoku game thread.
-
     :param root:
     :param lobby_data:
     :return:
@@ -227,22 +220,26 @@ if __name__ == "__main__":
     user_id, port = main_input(root)
     LOG.debug('Closing input window.')
 
+    # If received inputs are nones, it means client has left and there is nothing else we can do.
     if user_id is not None and port is not None:
         active_client = True
     else:
         active_client = False
 
+    # If the client is active, we will proceed.
     while active_client:
+        # Connect client to lobby and show the game rooms.
         lobby_data = main_lobby(root, port)
 
         # If we exited lobby permanently then break.
         if hard_exit:
             break
 
-        # If lobby returned odd stuff, then start again.
+        # If lobby returned odd stuff, then start it anew.
         if lobby_data is None:
             continue
 
         # If we got here, then we're ready to play.
         main_sudoku(root, lobby_data)
 
+    LOG.debug('kthxbye')
