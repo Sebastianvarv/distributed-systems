@@ -41,7 +41,6 @@ def update_lobby(root, port, room_window):
     lobby_data = room_window.action
 
     if lobby_data is not None:
-        LOG.debug("Lobby updating returned: " + str(lobby_data))
         destroy_lobby_window(room_window)
         return False
     else:
