@@ -12,7 +12,7 @@ __GAMES = Games()
 
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_CREATE_GAME, __REQ_ADD_PLAYER_TO_GAMEROOM, __REQ_MAKE_MOVE, \
-    __REQ_INIT_GAME, __RSP_OK, __REQ_CONNECT_SERVER_PORT, __RSP_GAME_FULL_ERROR, __REQ_GET_STATE
+    __REQ_INIT_GAME, __RSP_OK, __REQ_CONNECT_SERVER_PORT, __RSP_GAME_FULL_ERROR, __REQ_GET_STATE, __REQ_REMOVE_PLAYER
 
 
 def parse_msg(message, client_sock):
@@ -68,6 +68,12 @@ def parse_msg(message, client_sock):
         game = __GAMES.get_game(game_id)
         state = pickle.dumps(game.get_state(__PLAYERS))
         client_sock.send(__RSP_OK + __MSG_FIELD_SEP + state)
+
+    elif msg_header == __REQ_REMOVE_PLAYER:
+        print("Remove player from game")
+        game_id, player_id = message.split(__MSG_FIELD_SEP, 1)
+        __GAMES.remove_player_from_game(game_id, player_id)
+        client_sock.send(__RSP_OK + __MSG_FIELD_SEP)
 
     elif msg_header == __REQ_CONNECT_SERVER_PORT:
         client_sock.send(__RSP_OK)

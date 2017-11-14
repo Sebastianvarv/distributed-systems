@@ -3,7 +3,8 @@ from argparse import ArgumentParser
 from socket import socket, AF_INET, SOCK_STREAM, SHUT_WR
 from common import __MSG_FIELD_SEP, __REQ_REG_USER, __REQ_GET_GAMES, \
     __REQ_CREATE_GAME, __REQ_ADD_PLAYER_TO_GAMEROOM, __REQ_MAKE_MOVE, \
-    __REQ_INIT_GAME, __MSG_END, __RSP_OK, __REQ_CONNECT_SERVER_PORT, __RSP_GAME_FULL_ERROR, __REQ_GET_STATE
+    __REQ_INIT_GAME, __MSG_END, __RSP_OK, __REQ_CONNECT_SERVER_PORT, __RSP_GAME_FULL_ERROR, __REQ_GET_STATE, \
+    __REQ_REMOVE_PLAYER
 import logging
 
 # Setup logging
@@ -165,3 +166,19 @@ def req_get_state(game_id, server_port):
         sock.shutdown(SHUT_WR)
         sock.close()
         return state
+
+
+def req_remove_player(game_id, player_id, server_port):
+    """
+    Request to remove player from game room
+    :param game_id: game id
+    :param player_id: player id
+    :param server_port: server port
+    :return: None
+    """
+    sock = connect_server(server_port)
+    sock.send(__REQ_REMOVE_PLAYER + __MSG_FIELD_SEP + game_id + __MSG_FIELD_SEP + player_id)
+    resp = sock.recv(1024)
+    header, resp = resp.split(__MSG_FIELD_SEP, 1)
+    if header == __RSP_OK:
+        return
