@@ -27,20 +27,20 @@ def refresh_lobby(root, port, room_window):
     """
     global lobby_data
     games = req_get_games(port)
-    update_lobby(root, games)
+    update_lobby(room_window, games)
 
     lobby_data = room_window.action
 
     if lobby_data is not None:
         LOG.debug("Lobby updating returned: " + str(lobby_data))
-        destroy_lobby_window(root)
+        destroy_lobby_window(room_window)
         return False
     else:
         time.sleep(0.1)
         return True
 
 
-def refresh_lobby_loopy(root, port, room_window):
+def refresh_lobby_loopy(root, port, room_window, user_id):
     """
     This is the game lobby updater function.
     :param root:
@@ -54,6 +54,9 @@ def refresh_lobby_loopy(root, port, room_window):
     while keep_refreshing:
         if hard_exit:
             room_window.destroy()
+
+            # Remove player from the list of players in the server
+            req_remove_player_lobby(user_id, port)
             break
 
         keep_refreshing = refresh_lobby(root, port, room_window)
@@ -122,6 +125,9 @@ def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
 
         board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
 
+    sudoku_ui.destroy()
+    req_remove_player(game_id, user_id, port)
+
 
 def main_input(root):
     """
@@ -153,7 +159,7 @@ def main_input(root):
                 return user_id, client_window.port
 
 
-def main_lobby(root, port):
+def main_lobby(root, port, user_id):
     """
     Runs the main game lobby thread.
     :param root:
@@ -164,7 +170,7 @@ def main_lobby(root, port):
 
     room_window = initiate_lobby(root)
 
-    lobby_refresh_thread = threading.Thread(target=refresh_lobby_loopy(root, port, room_window))
+    lobby_refresh_thread = threading.Thread(target=refresh_lobby_loopy(root, port, room_window, user_id))
     lobby_refresh_thread.start()
 
     LOG.debug("Final lobby data is " + str(lobby_data))
@@ -232,7 +238,7 @@ if __name__ == "__main__":
     # If the client is active, we will proceed.
     while active_client:
         # Connect client to lobby and show the game rooms.
-        lobby_data = main_lobby(root, port)
+        lobby_data = main_lobby(root, port, user_id)
 
         # If we exited lobby permanently then break.
         if hard_exit:

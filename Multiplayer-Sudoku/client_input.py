@@ -17,6 +17,7 @@ INPUT_HEIGHT = 80
 LOBBY_WIDTH = 400
 LOBBY_HEIGHT = 400
 
+
 class ConnectionUI(Frame):
     """
     Initial name and port dialogue UI.
@@ -50,7 +51,6 @@ class ConnectionUI(Frame):
 
         self.submit_name = Button(self, text='Submit and connect', command=self.__submit_connect)
         self.submit_name.grid(row=2, column=1)
-
 
     def __submit_connect(self):
         """
@@ -147,7 +147,6 @@ class LobbyUI(Frame):
         else:
             tkMessageBox.showwarning("Connection error", "Please select a game from the lobby to join.")
 
-
     def __create_game(self):
         """
         Create game with some number of max players."""
@@ -169,7 +168,6 @@ class LobbyUI(Frame):
 
         if max_ok:
             self.action = ('create', max_count)
-
 
     def populate_list(self, games):
         """
@@ -218,23 +216,21 @@ def initiate_lobby(root):
     return room_window
 
 
-def update_lobby(root, games):
+def update_lobby(lobby_instance, games):
     """
     Update lobby list view from games list data.
-    :param root:
+    :param lobby_instance:
     :param games:
     """
 
-    lobby_instance = root.winfo_children()[0]
     lobby_instance.populate_list(games)
-    root.update()
+    lobby_instance.update()
 
 
-def destroy_lobby_window(root):
+def destroy_lobby_window(room_window):
     """
     Close lobby UI portion of root.
-    :param root:
+    :param room_window:
     """
-    lobby_instance = root.winfo_children()[0]
     LOG.debug('Lobby is destroyed.')
-    lobby_instance.destroy()
+    room_window.destroy()
