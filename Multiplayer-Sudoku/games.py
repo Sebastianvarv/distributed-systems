@@ -23,12 +23,12 @@ class Games:
         """
         return self.games[game_id]
 
-    def remove_empty(self):
+    def remove_empty_and_finished(self):
         """
-        Removes an empty game from the dictionary of games
+        Removes an empty and finished games from the dictionary of games
         """
         for game_id, game in self.games.items():
-            if len(game.scores) == 0:
+            if len(game.scores) == 0 or game.game_state == 2:
                 del self.games[game_id]
 
     def remove_player_from_game(self, game_id, player_id):
@@ -47,7 +47,7 @@ class Games:
         :return: (room_id, num_players, max_players)
         '''
         output = []
-        self.remove_empty()
+        self.remove_empty_and_finished()
         # (room_id, num players, max players)
         for uid, game in self.games.items():
             elem = tuple((uid, len(game.scores), game.max_players))
