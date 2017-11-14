@@ -1,5 +1,6 @@
 from Tkinter import Canvas, Frame, BOTH, CENTER
 from ttk import Treeview
+import tkMessageBox
 
 MARGIN = 20  # Pixels around the board
 SIDE = 50  # Width of every board cell.
@@ -132,7 +133,6 @@ class SudokuUI(Frame):
         self.score_list.column('name', width=80, anchor=CENTER)
         self.score_list.heading('score', text='Score')
         self.score_list.column('score', width=80, anchor=CENTER)
-        # self.score_list.pack(side=RIGHT)
 
         self.score_list.grid(row=1, column=1, padx=(0, 20))
 
@@ -140,6 +140,13 @@ class SudokuUI(Frame):
         self.score_list.delete(*self.score_list.get_children())
         for entry in scores:
             self.score_list.insert('', 'end', values=(entry[0], entry[1]))
+
+    def show_winner(self, score, user_id):
+        if score[2] == user_id:
+            winner_text = "YOU HAVE WON!"
+        else:
+            winner_text = "Player " + str(score[0]) + " has won!"
+        tkMessageBox.showwarning("A WINNER IS FOUND", winner_text)
 
     def update_board(self, root, board, scores, new_game_state):
         """

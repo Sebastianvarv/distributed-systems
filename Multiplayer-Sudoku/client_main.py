@@ -62,7 +62,7 @@ def refresh_lobby_loopy(root, port, room_window, user_id):
         keep_refreshing = refresh_lobby(root, port, room_window)
 
 
-def refresh_game_state(sudoku_ui, game_state):
+def refresh_game_state(sudoku_ui, game_state, user_id):
     """
     Calls the Sudoku UI game board visual state update.
     :param sudoku_ui:
@@ -75,6 +75,7 @@ def refresh_game_state(sudoku_ui, game_state):
     board_changed = sudoku_ui.update_board(root, board, scores, game_progression)
 
     if game_progression == 2:
+        sudoku_ui.show_winner(scores[0], user_id)
         keep_playing = False
 
     return board_changed, keep_playing
@@ -95,7 +96,7 @@ def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
     else:
         game_state = req_get_state(game_id, port)
 
-    board_changed, keep_playing = refresh_game_state(sudoku_ui, game_state)
+    board_changed, keep_playing = refresh_game_state(sudoku_ui, game_state, user_id)
 
     time.sleep(0.2)
     return board_changed, keep_playing
