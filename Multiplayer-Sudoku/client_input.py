@@ -100,6 +100,8 @@ class ConnectionUI(Frame):
             self.port = port
 
     def __select_preset(self, value):
+        """
+        Selects one of the preset names as the nickname """
         self.entry_nickname.delete(0, 'end')
         self.entry_nickname.insert('end', value)
 
