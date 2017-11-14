@@ -26,9 +26,17 @@ def refresh_lobby(root, port, room_window):
     if lobby_data is not None:
         LOG.debug("Lobby updating returned: " + str(lobby_data))
         destroy_lobby_window(root)
+        return False
     else:
         time.sleep(0.1)
-        refresh_lobby(root, port, room_window)
+        return True
+
+
+def refresh_lobby_loopy(root, port, room_window):
+    keep_refreshing = True
+
+    while keep_refreshing:
+        keep_refreshing = refresh_lobby(root, port, room_window)
 
 
 def refresh_game_state(game_state):
@@ -72,7 +80,7 @@ if __name__ == "__main__":
 
     room_window = initiate_lobby(root)
 
-    lobby_refresh_thread = threading.Thread(target=refresh_lobby(root, port, room_window))
+    lobby_refresh_thread = threading.Thread(target=refresh_lobby_loopy(root, port, room_window))
     lobby_refresh_thread.start()
 
     LOG.debug("Final lobby data is " + str(lobby_data))
