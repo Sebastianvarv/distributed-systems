@@ -160,7 +160,7 @@ fabric.properties
 .idea/
 TCP Application/common.pyc
 TCP Application/server_dump/
-TCP Application/test.txt
+Seminar 4/test.txt
 TCP Application/testfail_2.txt
 Threads/big.txt
 Threads/test.txt
@@ -176,3 +176,4 @@ UDP Application/part2/udp/mboard/sessions/server/__init__.pyc
 UDP Application/part2/udp/mboard/sessions/server/protocol.pyc
 UDP Application/part2/udp/mboard/sessions/server/sessions.pyc
 Threads/alice.txt
+/Seminar 4/test.txt
