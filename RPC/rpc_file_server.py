@@ -67,7 +67,9 @@ class Server:
 
     def start_main(self):
         try:
-            self.server.serve_forever()
+            server_thread = threading.Thread(self.server.serve_forever())
+            server_thread.daemon = True
+            server_thread.start()
         except KeyboardInterrupt:
             print 'Ctrl+C issued, terminating ...'
         finally:
