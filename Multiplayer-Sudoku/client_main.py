@@ -1,6 +1,6 @@
 from Tkinter import Tk
 import tkMessageBox
-from client_input import initiate_input, initiate_lobby, update_input, update_lobby, destroy_input_window, destroy_lobby_window
+from client_input import initiate_input, initiate_lobby, update_lobby, destroy_lobby_window
 from client import *
 import time
 import threading
@@ -14,62 +14,15 @@ LOG.setLevel(logging.INFO)
 
 sudoku_refresh_thread = None
 lobby_refresh_thread = None
-input_refresh_thread = None
-
-input_data = None
 lobby_data = None
-
 hard_exit = False
 
 
-def refresh_input(root, input_window):
-    global input_data
-    global hard_exit
-
-    servers = []
-    try:
-        # TODO: right proper req get servers be here
-        # servers = req_get_games(server_uri)
-        pass
-    except Exception as err:
-        tkMessageBox.showwarning("Connection error", str(err))
-        hard_exit = True
-        return
-
-    update_input(input_window, servers)
-    input_data = input_window.server_uri, input_window.nickname
-
-    if input_data[0] is not None and input_data[1] is not None:
-        destroy_input_window(input_window)
-        return False
-    else:
-        time.sleep(0.1)
-        return True
-
-
-def refresh_input_loopy(root, input_window):
-    """
-    This is the game lobby updater function.
-    :param root:
-    :param input_window:
-    :return:
-    """
-    global hard_exit
-    keep_refreshing = True
-
-    while keep_refreshing:
-        if hard_exit:
-            input_window.destroy()
-            break
-
-        keep_refreshing = refresh_input(root, input_window)
-
-
-def refresh_lobby(root, server_uri, room_window):
+def refresh_lobby(root, port, room_window):
     """
     Polls the server for its game list and updates the visual list with the new data.
     :param root:
-    :param server_uri:
+    :param port:
     :param room_window:
     :return loop ending boolean:
     """
@@ -78,7 +31,7 @@ def refresh_lobby(root, server_uri, room_window):
 
     games = []
     try:
-        games = req_get_games(server_uri)
+        games = req_get_games(port)
     except Exception as err:
         tkMessageBox.showwarning("Connection error", str(err))
         hard_exit = True
@@ -96,11 +49,11 @@ def refresh_lobby(root, server_uri, room_window):
         return True
 
 
-def refresh_lobby_loopy(root, server_uri, room_window, user_id):
+def refresh_lobby_loopy(root, port, room_window, user_id):
     """
     This is the game lobby updater function.
     :param root:
-    :param server_uri:
+    :param port:
     :param room_window:
     :return:
     """
@@ -113,14 +66,14 @@ def refresh_lobby_loopy(root, server_uri, room_window, user_id):
 
             # Remove player from the list of players in the server
             try:
-                req_remove_player_lobby(user_id, server_uri)
+                req_remove_player_lobby(user_id, port)
             except Exception as err:
                 tkMessageBox.showwarning("Connection error", str(err))
                 hard_exit = True
 
             break
 
-        keep_refreshing = refresh_lobby(root, server_uri, room_window)
+        keep_refreshing = refresh_lobby(root, port, room_window)
 
 
 def refresh_game_state(sudoku_ui, game_state, user_id):
@@ -142,12 +95,12 @@ def refresh_game_state(sudoku_ui, game_state, user_id):
     return board_changed, keep_playing
 
 
-def refresh_game(sudoku_ui, game_id, server_uri, user_id, board_changed=None):
+def refresh_game(sudoku_ui, game_id, port, user_id, board_changed=None):
     """
     Gets updated game state from server to refresh the visual game state if needed.
     :param sudoku_ui:
     :param game_id:
-    :param server_uri:
+    :param port:
     :param user_id:
     :param board_changed:
     :return loop ending boolean, board change for the next iteration:
@@ -156,9 +109,9 @@ def refresh_game(sudoku_ui, game_id, server_uri, user_id, board_changed=None):
 
     try:
         if board_changed is not None:
-            game_state = req_make_move(user_id, game_id, board_changed[0], board_changed[1], board_changed[2], server_uri)
+            game_state = req_make_move(user_id, game_id, board_changed[0], board_changed[1], board_changed[2], port)
         else:
-            game_state = req_get_state(game_id, server_uri)
+            game_state = req_get_state(game_id, port)
 
     except Exception as err:
         tkMessageBox.showwarning("Connection error", str(err))
@@ -171,12 +124,12 @@ def refresh_game(sudoku_ui, game_id, server_uri, user_id, board_changed=None):
     return board_changed, keep_playing
 
 
-def refresh_game_loopy(sudoku_ui, game_id, server_uri, user_id):
+def refresh_game_loopy(sudoku_ui, game_id, port, user_id):
     """
     This is the main game updater function.
     :param sudoku_ui:
     :param game_id:
-    :param server_uri:
+    :param port:
     :param user_id:
     :return:
     """
@@ -191,50 +144,62 @@ def refresh_game_loopy(sudoku_ui, game_id, server_uri, user_id):
 
             # Remove player from game
             try:
-                req_remove_player(game_id, user_id, server_uri)
+                req_remove_player(game_id, user_id, port)
             except Exception as err:
                 tkMessageBox.showwarning("Connection error", str(err))
             break
 
-        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, server_uri, user_id, board_changed)
+        board_changed, keep_playing = refresh_game(sudoku_ui, game_id, port, user_id, board_changed)
 
     sudoku_ui.destroy()
     try:
-        req_remove_player(game_id, user_id, server_uri)
+        req_remove_player(game_id, user_id, port)
     except Exception as err:
         tkMessageBox.showwarning("Connection error", str(err))
 
 
 def main_input(root):
     """
-    Keep refreshing input window until appropriate input is received and return it.
+    Keep refreshing input window until appropriate input is receiver and return it.
     :param root:
-    :return server_uri, nickname:
+    :return port, nickname:
     """
-    global input_data
     global hard_exit
-    input_window = initiate_input(root)
+    client_window = initiate_input(root)
 
-    input_refresh_thread = threading.Thread(target=refresh_input_loopy(root, input_window))
-    input_refresh_thread.start()
+    while True:
+        if hard_exit:
+            client_window.destroy()
+            return None, None
 
-    LOG.debug("Final input data is " + str(input_data))
+        root.update()
+        if client_window.port is not None and client_window.nickname is not None:
+            LOG.debug("Port: %d, nickname: %s" % (client_window.port, client_window.nickname))
+            user_id = None
 
-    return input_data
+            try:
+                user_id = reg_user(client_window.nickname, client_window.port)
+            except Exception as err:
+                client_window.port, client_window.nickname = None, None
+                tkMessageBox.showwarning("Connection error", str(err))
+
+            if user_id is not None:
+                client_window.destroy()
+                return user_id, client_window.port
 
 
-def main_lobby(root, server_uri, user_id):
+def main_lobby(root, port, user_id):
     """
     Runs the main game lobby thread.
     :param root:
-    :param server_uri:
+    :param port:
     :return:
     """
     global lobby_data
 
     room_window = initiate_lobby(root)
 
-    lobby_refresh_thread = threading.Thread(target=refresh_lobby_loopy(root, server_uri, room_window, user_id))
+    lobby_refresh_thread = threading.Thread(target=refresh_lobby_loopy(root, port, room_window, user_id))
     lobby_refresh_thread.start()
 
     LOG.debug("Final lobby data is " + str(lobby_data))
@@ -242,7 +207,7 @@ def main_lobby(root, server_uri, user_id):
     return lobby_data
 
 
-def main_sudoku(root, server_uri, lobby_data):
+def main_sudoku(root, lobby_data):
     """
     Runs the main sudoku game thread.
     :param root:
@@ -256,7 +221,7 @@ def main_sudoku(root, server_uri, lobby_data):
         LOG.debug("Creating new game by request of user")
 
         try:
-            game_id, game_state = req_create_game(user_id, value, server_uri)
+            game_id, game_state = req_create_game(user_id, value, port)
         except Exception as err:
             tkMessageBox.showwarning("Connection error", str(err))
             return
@@ -265,7 +230,7 @@ def main_sudoku(root, server_uri, lobby_data):
         game_id = value
 
         try:
-            game_state = req_join_game(user_id, game_id, server_uri)
+            game_state = req_join_game(user_id, game_id, port)
         except Exception as err:
             tkMessageBox.showwarning("Connection error", str(err))
             return
@@ -286,7 +251,7 @@ def main_sudoku(root, server_uri, lobby_data):
     sudoku_ui = SudokuGameGUI.SudokuUI(root, game)
     root.geometry("%dx%d" % (SudokuGameGUI.TOTAL_WIDTH, SudokuGameGUI.HEIGHT))
 
-    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, server_uri, user_id))
+    sudoku_refresh_thread = threading.Thread(target=refresh_game_loopy(sudoku_ui, game_id, port, user_id))
 
 
 def on_close():
@@ -305,33 +270,29 @@ if __name__ == "__main__":
     root = Tk()
     root.protocol("WM_DELETE_WINDOW", on_close)
 
-    while 1:
-        server_uri, user_id = main_input(root)
+    user_id, port = main_input(root)
+    LOG.debug('Closing input window.')
 
+    # If received inputs are nones, it means client has left and there is nothing else we can do.
+    if user_id is not None and port is not None:
+        active_client = True
+    else:
+        active_client = False
+
+    # If the client is active, we will proceed.
+    while active_client:
+        # Connect client to lobby and show the game rooms.
+        lobby_data = main_lobby(root, port, user_id)
+
+        # If we exited lobby permanently then break.
         if hard_exit:
             break
 
-        # If received inputs are nones, it means we basically fuck off.
-        if user_id is not None and server_uri is not None:
-            active_client = True
-        else:
-            active_client = False
+        # If lobby returned odd stuff, then start it anew.
+        if lobby_data is None:
+            continue
 
-        # If the client is active, we will proceed.
-        while active_client:
-            # Connect client to lobby and show the game rooms.
-            lobby_data = main_lobby(root, server_uri, user_id)
-
-            # If we exited lobby permanently then break.
-            if hard_exit:
-                hard_exit = False
-                break
-
-            # If lobby returned odd stuff, then start it anew.
-            if lobby_data is None:
-                continue
-
-            # If we got here, then we're ready to play.
-            main_sudoku(root, server_uri, lobby_data)
+        # If we got here, then we're ready to play.
+        main_sudoku(root, lobby_data)
 
     LOG.debug('kthxbye')
